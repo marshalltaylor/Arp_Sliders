@@ -45,7 +45,6 @@ $(CUBE_PROJECT_DIR)/Drivers/STM32F4xx_HAL_Driver/Inc \
 PROJECT_C_SOURCES = \
 ./App/App.cpp \
 ./App/sketch.cpp \
-./App/bpmMath.cpp \
 ./App/midiTime.cpp \
 ./App/BlinkerPanel.cpp \
 ./App/StatusPanel.cpp \
