@@ -1,0 +1,34 @@
+ArduinoLibs.xml
+---------------------
+
+
+
+ArduinoCore.xml
+----------------
+
+
+
+
+App.xml
+----------------
+
+
+
+
+HAL.xml
+----------------
+
+
+
+
+C:\Users\marshall>
+openocd -f "e:\github\Midi_Clock\UserProject\usbDebug.cfg" -c "init; reset halt"
+
+E:\github\Midi_Clock\UserProject>
+C:/STM32/gcc-arm-none-eabi/bin/arm-none-eabi-gdb -x gdbinit.txt build/output.elf
+
+https://www.youtube.com/watch?v=KYfADOlstwc
+
+
+256-19=237 clocks in 10s at 60bpm
+clocks/beat = 23.7 = 24
