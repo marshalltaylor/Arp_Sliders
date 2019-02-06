@@ -188,9 +188,10 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 
 	if( knob1.serviceChanged() )
 	{
-		//Serial6.print("knob1: ");
-		//Serial6.println(knob1.getState());
-		//Serial6.println(analogRead(A1));
+		Serial6.print("knob1: ");
+		Serial6.print(knob1.getState());
+		Serial6.print(" Val: ");
+		Serial6.println(analogRead(A1));
 		sprintf( knob1Str, "%3d", knob1.getAsInt16() );
 		knobStrShown = SELECT_KNOB_1;
 		glideRate = knob1.getAsInt16() * 1000;
@@ -200,7 +201,8 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	if( knob3.serviceChanged() )
 	{
 		Serial6.print("knob3: ");
-		Serial6.println(knob3.getState());
+		Serial6.print(knob3.getState());
+		Serial6.print(" Val: ");
 		Serial6.println(analogRead(A2));
 		sprintf( knob3Str, "%3d", knob3.getAsInt16() );
 		knobStrShown = SELECT_KNOB_3;
@@ -210,7 +212,8 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	if( knobTempo.serviceChanged() )
 	{
 		Serial6.print("knobTempo: ");
-		Serial6.println(knobTempo.getState());
+		Serial6.print(knobTempo.getState());
+		Serial6.print(" Val: ");
 		Serial6.println(analogRead(A2));
 		targetBPM = knobTempo.getAsInt16() * 1000;
 		//intMidiClock.setBPM(knobTempo.getAsInt16());

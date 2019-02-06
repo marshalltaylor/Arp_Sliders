@@ -71,6 +71,9 @@ extern void setup()
 	//Serial2.println("ok");
 	Serial6.println("OK");
 	intMidiClock.setBPM(100);
+	// Write our function address into the hw timer
+	//timer3TickCallback = &MidiClock::hwTimerCallback;
+	timer3TickCallback = intMidiClock.hwTimerCallback;
 	//Go to fresh state
 	mainPanel.reset();
 	statusPanel.reset();
@@ -124,7 +127,8 @@ extern void loop()
 	if(statusPanelTimer.flagStatus() == PENDING)
 	{
 		statusPanel.tickStateMachine(400);
-		intMidiClock.incrementTime_uS(400);
+		//intMidiClock.incrementTime_uS(400);
+		intMidiClock.service();
 	}
 	
 	if(debugTimer.flagStatus() == PENDING)

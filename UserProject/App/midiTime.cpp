@@ -5,6 +5,7 @@
 #include "StatusPanel.h"
 
 extern StatusPanel statusPanel;
+extern MidiClock intMidiClock;
 
 MidiClock::MidiClock(void)
 {
@@ -17,6 +18,10 @@ MidiClock::MidiClock(void)
 void MidiClock::incrementTime_uS(int deltaTime)
 {
 	timeElapsed += deltaTime;
+}
+
+void MidiClock::service(void)
+{
 	if(timeTickLength > 1000) // hardcode max BPM = 2500
 	{
 		while(timeElapsed > timeTickLength)
@@ -24,8 +29,8 @@ void MidiClock::incrementTime_uS(int deltaTime)
 			timeElapsed -= timeTickLength;
 			incrementTick();
 		}
-	}
-		
+	}		
+
 }
 
 void MidiClock::setBPM(int newBPM)
@@ -151,6 +156,12 @@ void MidiClock::processCallbacks( void )
 	
 }
 
+void MidiClock::hwTimerCallback(void)
+{
+	// Things!
+	intMidiClock.incrementTime_uS(100);
+}
+
 MidiClockSocket::MidiClockSocket(void)
 {
 	
@@ -165,6 +176,7 @@ void MidiClockSocket::SwitchMidiClock(MidiClock * inputClock)
 	// set callbacks
 	//socketed->midiClockCallbacks = socketed.callbacks;
 	socketed->BeatCallback = BeatCallback;
+	
 }
 
 // This sets the socket's callback

@@ -17,6 +17,7 @@ public:
 	MidiClock(void);
 	void incrementTick(void);
 	void incrementTime_uS(int);
+	void service(void);
 	void setBPM(int);
 	void play(void);
 	void resume(void);
@@ -30,6 +31,7 @@ public:
 	
 	void (*BeatCallback)(MidiClock *);
 	//MidiClockCallbacks * midiClockCallbacks;
+	static void hwTimerCallback(void);
 private:
 	uint32_t timeElapsed;
 	uint32_t timeTickLength;

@@ -5,9 +5,12 @@
 #include "main.h"
 #include "usart.h"
 #include "HardwareSerial.h"
+#include "tim.h"
 
 extern HardwareSerial Serial2;
 extern HardwareSerial Serial6;
+
+extern void (*timer3TickCallback)( void );
 
 extern uint32_t usTicks;
 extern uint8_t usTicksLocked;

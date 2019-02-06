@@ -10,7 +10,6 @@
 
 int AppEntry(void);
 
-
 #ifdef __cplusplus
 }
 #endif

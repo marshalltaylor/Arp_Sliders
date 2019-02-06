@@ -55,6 +55,8 @@ extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN Private defines */
 
+extern void (*timer3TickCallback)( void );
+
 /* USER CODE END Private defines */
 
 extern void _Error_Handler(char *, int);

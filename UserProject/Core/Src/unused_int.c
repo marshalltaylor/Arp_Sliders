@@ -217,10 +217,10 @@ void TIM1_CC_IRQHandler( void )
 //	isr_break(38);
 //}
 
-void TIM3_IRQHandler( void )
-{
-	isr_break(39);
-}
+//void TIM3_IRQHandler( void )
+//{
+//	isr_break(39);
+//}
 
 void TIM4_IRQHandler( void )
 {
