@@ -20,18 +20,23 @@ public:
 	void service(void);
 	void setBPM(int);
 	void play(void);
-	void resume(void);
+	void enableOutput(void);
+	void disableOutput(void);
 	void stop(void);
 	bool isTickSubDiv( uint32_t inputTicks, int8_t inputSubDiv );
 	uint32_t ticksToQuarterNotes( uint32_t inputTicks );
 	uint32_t ticksToMeasures( uint32_t inputTicks );
 	void processCallbacks( void );	
 	uint32_t ticks;
-	bool isPlaying;
 	
 	void (*BeatCallback)(MidiClock *);
 	//MidiClockCallbacks * midiClockCallbacks;
 	static void hwTimerCallback(void);
+
+//shouldBePrivate:
+	bool isPlaying;
+	bool outputEnabled = false;
+
 private:
 	uint32_t timeElapsed;
 	uint32_t timeTickLength;

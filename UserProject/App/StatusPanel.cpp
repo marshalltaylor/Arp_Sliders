@@ -23,10 +23,12 @@ void StatusPanel::BeatCallback(MidiClock * caller)
 	sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
 	Segments.displayDrawClockNums(buffer);
 	//toggleClockColon();
-	Serial6.println("  *");	
+	//Serial6.println("  *");	
 
 	statusPanel.beatFlag.setFlag();
 	statusPanel.beatFlag.clearFlag();
+	statusPanel.playFlag.setFlag();
+	statusPanel.playFlag.clearFlag();
 
 }
 
@@ -47,7 +49,7 @@ void StatusPanel::reset( void )
 	//Set all LED off
 	ledBeat.setState(LEDOFF);
 	ledPlay.setState(LEDOFF);
-	state = SPInit;
+	beatLedState = BeatLedStateInit;
 	ClockSocket->socketed = NULL;
 	
 }
@@ -55,45 +57,82 @@ void StatusPanel::reset( void )
 void StatusPanel::tickStateMachine( int usTicksDelta )
 {
 	beatTimeKeeper.uIncrement( usTicksDelta );
+	playTimeKeeper.uIncrement( usTicksDelta );
 	
 	// I don't think LEDs use the value here, normally you would pass msTicksDelta
 	freshenComponents( 1 );
 	
 	//***** PROCESS THE LOGIC *****//
 	//Now do the states.
-	SPStates nextState = state;
-	switch( state )
+	switch( beatLedState )
 	{
-	case SPInit:
-		nextState = SPOff;
+	case BeatLedStateInit:
+		beatLedState = BeatLedStateOff;
 		break;
-	case SPOff:
+	case BeatLedStateOff:
 		if( beatFlag.serviceRisingEdge() )
 		{
-			nextState = SPOn;
+			beatLedState = BeatLedStateOn;
 			ledBeat.setState(LEDON);
 			beatTimeKeeper.uClear();
 		}
 		break;
-	case SPOn:
+	case BeatLedStateOn:
 		if( beatTimeKeeper.uGet() > 10000 )
 		{
-			nextState = SPOff;
+			beatLedState = BeatLedStateOff;
 			ledBeat.setState(LEDOFF);
 		}
 		break;
 	default:
-		nextState = SPInit;
+		beatLedState = BeatLedStateInit;
 		break;
 	}
-	state = nextState;
 
-	if( ClockSocket->socketed->isPlaying )
+	switch( playLedState )
 	{
-		ledPlay.setState(LEDON);
+	case PlayLedStateInit:
+		playLedState = PlayLedStateOff;
+		break;
+	case PlayLedStateOff:
+		if( ClockSocket->socketed->isPlaying )
+		{
+			playLedState = PlayLedStateOn;
+			Serial6.println(" to PlayLedStateOn");
+			ledPlay.setState(LEDON);
+		}
+		else if( playFlag.serviceRisingEdge() )
+		{
+			if( ClockSocket->socketed->outputEnabled && !ClockSocket->socketed->isPlaying )
+			{
+				playLedState = PlayLedStateBlink;
+				Serial6.println(" to PlayLedStateBlink");
+				ledPlay.setState(LEDON);
+				playTimeKeeper.uClear();
+			}
+		}
+
+		break;
+	case PlayLedStateOn:
+		if( !ClockSocket->socketed->isPlaying )
+		{
+			playFlag.serviceRisingEdge();
+			playLedState = PlayLedStateOff;
+			Serial6.println(" to PlayLedStateOff");
+			ledPlay.setState(LEDOFF);
+		}
+		break;
+	case PlayLedStateBlink:
+		if( playTimeKeeper.uGet() > 600 )
+		{
+			playLedState = PlayLedStateOff;
+			Serial6.println(" to PlayLedStateOff");
+			ledPlay.setState(LEDOFF);
+		}
+		break;
+	default:
+		playLedState = PlayLedStateInit;
+		break;
 	}
-	else
-	{
-		ledPlay.setState(LEDOFF);
-	}
+
 }

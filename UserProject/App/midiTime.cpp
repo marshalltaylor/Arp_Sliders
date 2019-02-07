@@ -52,12 +52,14 @@ void MidiClock::play(void)
 	processCallbacks();
 }
 
-void MidiClock::resume(void)
+void MidiClock::enableOutput(void)
 {
-	ticks = 0; //TODO: This should be optional
-	isPlaying = true;
-	//setPlayIndicator();
-	displayTransmitFrame();
+	outputEnabled = true;
+}
+
+void MidiClock::disableOutput(void)
+{
+	outputEnabled = false;
 }
 
 void MidiClock::stop(void)
@@ -117,17 +119,17 @@ void MidiClock::processCallbacks( void )
 	if( isTickSubDiv(ticks, -2) )
 	{
 		//Callbacks
-		Serial6.print("|     ");
-		Serial6.print("  Playing: ");
-		Serial6.print(isPlaying);
-		Serial6.print("  Ticks: ");
-		Serial6.println(ticks);
+		//Serial6.print("|     ");
+		//Serial6.print("  Playing: ");
+		//Serial6.print(isPlaying);
+		//Serial6.print("  Ticks: ");
+		//Serial6.println(ticks);
 
 	}
 	if( isTickSubDiv(ticks, -1) )
 	{
 		//Callbacks
-		Serial6.println(" O");
+		//Serial6.println(" O");
 	}
 	if( isTickSubDiv(ticks, 0) )
 	{

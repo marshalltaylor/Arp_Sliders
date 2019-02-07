@@ -160,6 +160,7 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 		if(!timeMaster)
 		{
 			switchToInternalClock();
+			intMidiClock.stop();
 		}
 		else
 		{
@@ -173,16 +174,42 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	if( play.serviceRisingEdge() )
 	{
 		Serial6.println("play");
-		if(!timeMaster)
+		if( statusPanel.ClockSocket->socketed->isPlaying )
 		{
-			switchToInternalClock();
+			//Go pause
+			if( statusPanel.ClockSocket->socketed->outputEnabled )
+			{
+				statusPanel.ClockSocket->socketed->disableOutput();
+			}
+			else
+			{
+				statusPanel.ClockSocket->socketed->enableOutput();
+			}
 		}
-		intMidiClock.play();
+		else
+		{
+			statusPanel.ClockSocket->socketed->enableOutput();
+			//Attempt to play
+			if( statusPanel.ClockSocket->socketed == &intMidiClock )
+			{
+				statusPanel.ClockSocket->socketed->play();
+			}
+		}
 	}
 	if( stop.serviceRisingEdge() )
 	{
 		Serial6.println("stop");
-		intMidiClock.stop();
+		if( statusPanel.ClockSocket->socketed == &intMidiClock )
+		{
+			statusPanel.ClockSocket->socketed->stop();
+			statusPanel.ClockSocket->socketed->disableOutput();
+		}
+		if( statusPanel.ClockSocket->socketed == &extMidiClock )
+		{
+			// Can't stop it
+			statusPanel.ClockSocket->socketed->disableOutput();
+		}
+		
 	}
 	
 

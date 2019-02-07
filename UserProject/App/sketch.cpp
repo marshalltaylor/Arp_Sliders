@@ -41,7 +41,8 @@ void handleStart( void )
 
 void handleContinue( void )
 {
-	extMidiClock.resume();
+	//extMidiClock.pause();
+	extMidiClock.play();
 }
 
 void handleStop( void )
@@ -134,8 +135,10 @@ extern void loop()
 	if(debugTimer.flagStatus() == PENDING)
 	{
 		//User code
-		Serial6.println("*~DEBUG~*");
-		Serial6.println(mainPanel.getState());
+		char buffer[200] = {0};
+		sprintf(buffer, "__DEBUG______\nintPlay = %d, intOE = %d\nextPlay = %d, extOE = %d\nbeatState = %d, playLed = %d\n", intMidiClock.isPlaying, intMidiClock.outputEnabled, extMidiClock.isPlaying, extMidiClock.outputEnabled, statusPanel.beatLedState, statusPanel.playLedState);
+		Serial6.print(buffer);
+		//Serial6.println(mainPanel.getState());
 		//Serial6.print("Playing: ");
 	}
 	if(segmentVideoTimer.flagStatus() == PENDING)

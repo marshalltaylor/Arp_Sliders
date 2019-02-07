@@ -10,11 +10,19 @@
 #include "timeKeeper32.h"
 #include "midiTime.h"
 
-enum SPStates
+enum BeatLedStates
 {
-	SPInit,
-	SPOff,
-	SPOn
+	BeatLedStateInit,
+	BeatLedStateOff,
+	BeatLedStateOn
+};
+
+enum PlayLedStates
+{
+	PlayLedStateInit,
+	PlayLedStateOff,
+	PlayLedStateBlink,
+	PlayLedStateOn
 };
 
 class StatusPanel : public Panel
@@ -24,12 +32,15 @@ public:
 	void reset( void );
 	void tickStateMachine( int msTicksDelta );
 	uint8_t getState( void ){
-		return (uint8_t)state;
+		return (uint8_t)beatLedState;
 	}
 
 	MidiClockSocket * ClockSocket;
 	static void BeatCallback(MidiClock *);
 
+	//State machine stuff  
+	BeatLedStates beatLedState;
+	PlayLedStates playLedState;
 private:
 	//Internal Panel Components
 	Led ledBeat;
@@ -37,10 +48,12 @@ private:
 	
 	//...And variables
 	MessagingFlag beatFlag;
-	TimeKeeper32 beatTimeKeeper;
+	MessagingFlag playFlag;
 	
-	//State machine stuff  
-	SPStates state;
+	TimeKeeper32 beatTimeKeeper;
+	TimeKeeper32 playTimeKeeper;
+	
+
 };
 
 #endif
