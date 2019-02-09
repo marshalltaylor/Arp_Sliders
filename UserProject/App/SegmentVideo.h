@@ -5,6 +5,12 @@
 #define FB_WATERMARK 16
 #define FB_FIFO_SIZE 40
 
+struct BufferChannels
+{
+	uint8_t * onBufferPtr;
+	uint8_t * offBufferPtr;
+};
+
 class SegmentFrameBuffer
 {
 public:
@@ -12,9 +18,10 @@ public:
 	void write(const uint8_t *);
 	bool ready( void );
 	bool empty( void );
-	uint8_t * read( void );
+	BufferChannels read( void );
 private:
-	uint8_t buffer[FB_FIFO_SIZE][11];
+	uint8_t onBuffer[FB_FIFO_SIZE][11];
+	uint8_t offBuffer[FB_FIFO_SIZE][11];
 	uint8_t outputPtr = 0;
 	uint8_t nextToWrite = 1;
 };
@@ -35,6 +42,7 @@ public:
 	SegmentFrameBuffer maskStream;
 	SegmentFrameBuffer userStream;
 private:
+	uint8_t outputFrame[11];
 };
 
 #endif

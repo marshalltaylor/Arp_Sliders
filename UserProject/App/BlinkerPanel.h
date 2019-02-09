@@ -13,7 +13,8 @@ enum PStates
 	PInit,
 	POn,
 	PFlash,
-	PFastFlash
+	PFastFlash,
+	PRunning
 };
 
 typedef enum displayStates
@@ -66,7 +67,7 @@ private:
 	Windowed10BitKnob knobTempo;
 
 	//  ..and data
-	uint8_t timeMaster;
+	bool timeMaster;
 	
 	//State machine stuff  
 	PStates state;

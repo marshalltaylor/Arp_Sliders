@@ -8,6 +8,9 @@
 #include "timeKeeper32.h"
 #include "BlinkerPanel.h"
 #include "SegmentVideo.h"
+#include <MIDI.h>
+#include "midi_Defs.h"
+extern midi::MidiInterface<HardwareSerial> MIDI;
 
 extern MidiClock extMidiClock;
 extern MidiClock intMidiClock;
@@ -20,15 +23,52 @@ extern StatusPanel statusPanel;
 void StatusPanel::BeatCallback(MidiClock * caller)
 {
 	char buffer[4];
-	sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
+	// Screen logic
+	switch(caller->getState())
+	{
+		case Stopped:
+		{
+			sprintf( buffer, "----" );
+		}
+		break;
+		case OutputOff:
+		{
+			sprintf( buffer, "    " );
+		}
+		break;
+		default:
+		{
+			sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
+		}
+		break;
+	}
 	Segments.displayDrawClockNums(buffer);
-	//toggleClockColon();
-	//Serial6.println("  *");	
 
-	statusPanel.beatFlag.setFlag();
-	statusPanel.beatFlag.clearFlag();
-	statusPanel.playFlag.setFlag();
-	statusPanel.playFlag.clearFlag();
+	// LED logic
+	switch(caller->getState())
+	{
+		case Stopped:
+		case Playing:
+		{
+			statusPanel.beatFlag.setFlag();
+			statusPanel.beatFlag.clearFlag();
+			statusPanel.playFlag.setFlag();
+			statusPanel.playFlag.clearFlag();
+		}
+		break;
+		default:
+		break;
+	}
+
+}
+
+void StatusPanel::TickCallback(MidiClock * caller)
+{
+	//Send midi
+	if(caller->outputEnabled)
+	{
+		MIDI.sendRealTime(midi::Clock);
+	}
 
 }
 
@@ -63,6 +103,8 @@ void StatusPanel::tickStateMachine( int usTicksDelta )
 	freshenComponents( 1 );
 	
 	//***** PROCESS THE LOGIC *****//
+	MidiClock * clock = ClockSocket->socketed;
+	
 	//Now do the states.
 	switch( beatLedState )
 	{
@@ -95,7 +137,7 @@ void StatusPanel::tickStateMachine( int usTicksDelta )
 		playLedState = PlayLedStateOff;
 		break;
 	case PlayLedStateOff:
-		if( ClockSocket->socketed->isPlaying )
+		if( clock->getState() == Playing )
 		{
 			playLedState = PlayLedStateOn;
 			Serial6.println(" to PlayLedStateOn");
@@ -103,7 +145,7 @@ void StatusPanel::tickStateMachine( int usTicksDelta )
 		}
 		else if( playFlag.serviceRisingEdge() )
 		{
-			if( ClockSocket->socketed->outputEnabled && !ClockSocket->socketed->isPlaying )
+			if( clock->getState() == Paused )
 			{
 				playLedState = PlayLedStateBlink;
 				Serial6.println(" to PlayLedStateBlink");
@@ -114,7 +156,7 @@ void StatusPanel::tickStateMachine( int usTicksDelta )
 
 		break;
 	case PlayLedStateOn:
-		if( !ClockSocket->socketed->isPlaying )
+		if( clock->getState() == Stopped )
 		{
 			playFlag.serviceRisingEdge();
 			playLedState = PlayLedStateOff;

@@ -7,12 +7,13 @@
 extern StatusPanel statusPanel;
 extern MidiClock intMidiClock;
 
+
 MidiClock::MidiClock(void)
 {
 	ticks = 0;
 	timeElapsed = 0;
 	timeTickLength = 0;
-	isPlaying = false;
+
 }
 
 void MidiClock::incrementTime_uS(int deltaTime)
@@ -40,15 +41,10 @@ void MidiClock::setBPM(int newBPM)
 
 void MidiClock::incrementTick(void)
 {
-	ticks++;
-	processCallbacks();
-}
-
-void MidiClock::play(void)
-{
-	ticks = 0;
-	isPlaying = true;
-	//setPlayIndicator();
+	if( playState != Paused )
+	{
+		ticks++;
+	}
 	processCallbacks();
 }
 
@@ -62,42 +58,19 @@ void MidiClock::disableOutput(void)
 	outputEnabled = false;
 }
 
-void MidiClock::stop(void)
+void MidiClock::setTickCount( uint32_t input )
 {
-	//clearPlayIndicator();
-	displayTransmitFrame();
-	isPlaying = false;
+	ticks = input;
 }
 
-bool MidiClock::isTickSubDiv( uint32_t inputTicks, int8_t inputSubDiv )
+void MidiClock::setState( PlayState_t input )
 {
-	bool retVar;
-	int16_t ticksPerBeat;
-	switch (inputSubDiv)
-	{
-		case -2: // 4 bar
-		ticksPerBeat = 384;
-		break;
-		case -1: // measure/whole
-		ticksPerBeat = 96;
-		break;
-		case 0: // quarter
-		ticksPerBeat = 24;
-		break;
-		case 1: // 8th
-		ticksPerBeat = 12;
-		break;
-		case 2: // 16th
-		ticksPerBeat = 6;
-		break;
-		case 3: // 32nd
-		ticksPerBeat = 3;
-		break;
-		default:
-		break;
-	}
-	retVar = !(inputTicks % ticksPerBeat);
-	return retVar;
+	playState = input;
+}
+
+PlayState_t MidiClock::getState(void)
+{
+	return playState;
 }
 
 uint32_t MidiClock::ticksToQuarterNotes( uint32_t inputTicks )
@@ -116,46 +89,25 @@ uint32_t MidiClock::ticksToMeasures( uint32_t inputTicks )
 
 void MidiClock::processCallbacks( void )
 {
-	if( isTickSubDiv(ticks, -2) )
+	// Per-tick
+	if(TickCallback != NULL)
 	{
-		//Callbacks
-		//Serial6.print("|     ");
-		//Serial6.print("  Playing: ");
-		//Serial6.print(isPlaying);
-		//Serial6.print("  Ticks: ");
-		//Serial6.println(ticks);
-
+		TickCallback(this);
 	}
-	if( isTickSubDiv(ticks, -1) )
+	if( playState == Paused )
 	{
-		//Callbacks
-		//Serial6.println(" O");
+		return;
 	}
-	if( isTickSubDiv(ticks, 0) )
+	// Down-beat
+	int16_t ticksOfQuarterNote = ticks % 24;
+	if( ticksOfQuarterNote == 1 )
 	{
-		//Callbacks
-	
 		//statusPanel.beat();
 		if(BeatCallback != NULL)
 		{
 			BeatCallback(this);
 		}
-
 	}
-	if( isTickSubDiv(ticks, 1) )
-	{
-		//Callbacks
-		
-	}
-	if( isTickSubDiv(ticks, 2) )
-	{
-		//Callbacks
-	}
-	if( isTickSubDiv(ticks, 3) )
-	{
-		//Callbacks
-	}
-	
 }
 
 void MidiClock::hwTimerCallback(void)
@@ -169,15 +121,21 @@ MidiClockSocket::MidiClockSocket(void)
 	
 }
 
+MidiClock * MidiClockSocket::getSocketedClock(void)
+{
+	return socketed;
+}
+
 void MidiClockSocket::SwitchMidiClock(MidiClock * inputClock)
 {
 	// Teardown current clock
 	socketed->BeatCallback = NULL;
+	socketed->TickCallback = NULL;
 	// Insert new one
 	socketed = inputClock;
 	// set callbacks
-	//socketed->midiClockCallbacks = socketed.callbacks;
 	socketed->BeatCallback = BeatCallback;
+	socketed->TickCallback = TickCallback;
 	
 }
 
@@ -188,4 +146,10 @@ void MidiClockSocket::SetBeatCallback(void (*name)(MidiClock *))
 	//callbacks.beatCallback = name;
 	//refresh socketed?
 	socketed->BeatCallback = BeatCallback;
+}
+
+void MidiClockSocket::SetTickCallback(void (*name)(MidiClock *))
+{
+	TickCallback = name;
+	socketed->TickCallback = name;
 }

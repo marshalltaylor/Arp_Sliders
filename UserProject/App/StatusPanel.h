@@ -37,6 +37,7 @@ public:
 
 	MidiClockSocket * ClockSocket;
 	static void BeatCallback(MidiClock *);
+	static void TickCallback(MidiClock *);
 
 	//State machine stuff  
 	BeatLedStates beatLedState;

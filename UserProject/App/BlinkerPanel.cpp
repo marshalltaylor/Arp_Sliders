@@ -6,6 +6,9 @@
 #include "midiTime.h"
 #include "StatusPanel.h"
 #include "SegmentVideo.h"
+#include <MIDI.h>
+#include "midi_Defs.h"
+extern midi::MidiInterface<HardwareSerial> MIDI;
 
 extern MidiClock extMidiClock;
 extern MidiClock intMidiClock;
@@ -102,8 +105,8 @@ void BlinkerPanel::reset( void )
 	state = PInit;
 	displayState = init;
 	
-	timeMaster = 0;
-	switchToExternalClock();
+	// timeMaster = true; //overridden by switchTo...
+	switchToInternalClock();
 	
 	currentBPM = knobTempo.getAsInt16() * 1000;
 	targetBPM = currentBPM;
@@ -117,12 +120,17 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	freshenComponents( msTicksDelta );
 	displaySMTK.uIncrement( msTicksDelta * 1000 );
 	//***** PROCESS THE LOGIC *****//
+	MidiClock * clock = statusPanel.ClockSocket->socketed;
 	//Now do the states.
 	PStates nextState = state;
 	switch( state )
 	{
 	case PInit:
 		//Can't be running, if button pressed move on
+		reset();
+		nextState = PRunning;
+		break;
+	case PRunning:
 		break;
 	default:
 		nextState = PInit;
@@ -159,8 +167,8 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 		Serial6.println("Button4");
 		if(!timeMaster)
 		{
+//			clock->stop();
 			switchToInternalClock();
-			intMidiClock.stop();
 		}
 		else
 		{
@@ -174,42 +182,69 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	if( play.serviceRisingEdge() )
 	{
 		Serial6.println("play");
-		if( statusPanel.ClockSocket->socketed->isPlaying )
+		
+		if( timeMaster )
 		{
-			//Go pause
-			if( statusPanel.ClockSocket->socketed->outputEnabled )
+			switch( clock->getState() )
 			{
-				statusPanel.ClockSocket->socketed->disableOutput();
-			}
-			else
-			{
-				statusPanel.ClockSocket->socketed->enableOutput();
+				case OutputOff:
+				case Stopped:
+				{
+					clock->setState(Playing);
+					clock->setTickCount(0);
+					MIDI.sendRealTime(midi::Start);
+				}
+				break;
+				case Playing:
+				{
+					clock->setState(Paused);
+					MIDI.sendRealTime(midi::Stop);
+				}
+				break;
+				case Paused:
+				{
+					clock->setState(Playing);
+					MIDI.sendRealTime(midi::Continue);
+				}
+				break;
+				default:
+				break;
+
 			}
 		}
 		else
 		{
-			statusPanel.ClockSocket->socketed->enableOutput();
-			//Attempt to play
-			if( statusPanel.ClockSocket->socketed == &intMidiClock )
-			{
-				statusPanel.ClockSocket->socketed->play();
-			}
+			//Let midi do it
 		}
 	}
 	if( stop.serviceRisingEdge() )
 	{
-		Serial6.println("stop");
-		if( statusPanel.ClockSocket->socketed == &intMidiClock )
+		if( timeMaster )
 		{
-			statusPanel.ClockSocket->socketed->stop();
-			statusPanel.ClockSocket->socketed->disableOutput();
+			switch( clock->getState() )
+			{
+			case Paused:
+			case Playing:
+			{
+				clock->setState(Stopped);
+				MIDI.sendRealTime(midi::Stop);
+			}
+			break;
+			case Stopped:
+			{
+				clock->setState(OutputOff);
+				//just in case
+				MIDI.sendRealTime(midi::Stop);
+			}
+			break;
+			default:
+			break;
+			}
 		}
-		if( statusPanel.ClockSocket->socketed == &extMidiClock )
+		else
 		{
-			// Can't stop it
-			statusPanel.ClockSocket->socketed->disableOutput();
+			//Let midi do it
 		}
-		
 	}
 	
 

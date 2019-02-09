@@ -28,6 +28,14 @@ TimerClass32 mainPanelTimer( 10000 );
 TimerClass32 statusPanelTimer( 400 );
 TimerClass32 segmentVideoTimer( 5000 );
 
+#if defined(__arm__)
+extern "C" char* sbrk(int incr);
+static int FreeStack() {
+  char top = 't';
+  return &top - reinterpret_cast<char*>(sbrk(0));
+}
+#endif
+
 void handleClock( void )
 {
 	extMidiClock.incrementTick();
@@ -36,18 +44,18 @@ void handleClock( void )
 
 void handleStart( void )
 {
-	extMidiClock.play();
+	extMidiClock.setTickCount(0);
+	extMidiClock.setState(Playing);
 }
 
 void handleContinue( void )
 {
-	//extMidiClock.pause();
-	extMidiClock.play();
+	extMidiClock.setState(Playing);
 }
 
 void handleStop( void )
 {
-	extMidiClock.stop();
+	extMidiClock.setState(Stopped);
 }
 
 	
@@ -80,6 +88,7 @@ extern void setup()
 	statusPanel.reset();
 	
 	clockSocket.SetBeatCallback(statusPanel.BeatCallback);
+	clockSocket.SetTickCallback(statusPanel.TickCallback);
 	clockSocket.SwitchMidiClock(&extMidiClock);
 	statusPanel.ClockSocket = &clockSocket;
 
@@ -136,7 +145,7 @@ extern void loop()
 	{
 		//User code
 		char buffer[200] = {0};
-		sprintf(buffer, "__DEBUG______\nintPlay = %d, intOE = %d\nextPlay = %d, extOE = %d\nbeatState = %d, playLed = %d\n", intMidiClock.isPlaying, intMidiClock.outputEnabled, extMidiClock.isPlaying, extMidiClock.outputEnabled, statusPanel.beatLedState, statusPanel.playLedState);
+		sprintf(buffer, "__DEBUG______\nintPlayState = %d, intOE = %d\nextPlayState = %d, extOE = %d\nbeatState = %d, playLed = %d\nFreeStack() = %d\n\n", intMidiClock.playState, intMidiClock.outputEnabled, extMidiClock.playState, extMidiClock.outputEnabled, statusPanel.beatLedState, statusPanel.playLedState, FreeStack());
 		Serial6.print(buffer);
 		//Serial6.println(mainPanel.getState());
 		//Serial6.print("Playing: ");
@@ -148,4 +157,5 @@ extern void loop()
 
 	
 }
+
 
