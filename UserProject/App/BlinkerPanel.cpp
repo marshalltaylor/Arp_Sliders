@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include "midiTime.h"
 #include "StatusPanel.h"
-#include "SegmentVideo.h"
+#include "MidiClockDisplay.h"
 #include <MIDI.h>
 #include "midi_Defs.h"
 extern midi::MidiInterface<HardwareSerial> MIDI;
@@ -14,27 +14,7 @@ extern MidiClock extMidiClock;
 extern MidiClock intMidiClock;
 extern MidiClockSocket clockSocket;
 extern StatusPanel statusPanel;
-extern SegmentVideo Segments;
-
-const uint8_t FadePixelMap[16][11] =
-{
-	{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x03, 0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x03, 0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x23, 0x23, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x23, 0x23, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x63, 0x63, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x63, 0x63, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x67, 0x67, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x67, 0x67, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x77, 0x77, 0x77, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x77, 0x77, 0x77, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	{0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-};
+extern MidiClockDisplay Segments;
 
 const uint8_t FadePixelAllow[11] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 const uint8_t FadePixelDeny[11] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -72,7 +52,7 @@ BlinkerPanel::BlinkerPanel( void )
 	knob1.setUpperKnobVal(1014);
 	knob1.setLowerIntVal(0);
 	knob1.setUpperIntVal(100);
-	knob1.setSamplesAveraged(5);
+	knob1.setSamplesAveraged(10);
 
 	knob3.setHardware(new ArduinoAnalogIn( A0 ));
 	add( &knob3 );
@@ -80,7 +60,7 @@ BlinkerPanel::BlinkerPanel( void )
 	knob3.setUpperKnobVal(1014);
 	knob3.setLowerIntVal(0);
 	knob3.setUpperIntVal(255);
-	knob3.setSamplesAveraged(5);
+	knob3.setSamplesAveraged(10);
 
 	knobTempo.setHardware(new ArduinoAnalogIn( A2 ));
 	add( &knobTempo );
@@ -88,7 +68,7 @@ BlinkerPanel::BlinkerPanel( void )
 	knobTempo.setUpperKnobVal(1014);
 	knobTempo.setLowerIntVal(40);
 	knobTempo.setUpperIntVal(208);
-	knobTempo.setSamplesAveraged(5);
+	knobTempo.setSamplesAveraged(10);
 
 	reset();
 
@@ -103,7 +83,6 @@ void BlinkerPanel::reset( void )
 	led3.setState(LEDOFF);
 	led4.setState(LEDOFF);
 	state = PInit;
-	displayState = init;
 	
 	// timeMaster = true; //overridden by switchTo...
 	switchToInternalClock();
@@ -118,7 +97,7 @@ void BlinkerPanel::reset( void )
 void BlinkerPanel::tickStateMachine( int msTicksDelta )
 {
 	freshenComponents( msTicksDelta );
-	displaySMTK.uIncrement( msTicksDelta * 1000 );
+	Segments.displaySMTK.uIncrement( msTicksDelta * 1000 );
 	//***** PROCESS THE LOGIC *****//
 	MidiClock * clock = statusPanel.ClockSocket->socketed;
 	//Now do the states.
@@ -155,7 +134,8 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	{
 		Serial6.println("Button2");
 		led2.toggle();
-		emergencyRestart();
+		//emergencyRestart();
+		Segments.debugNoise = !led2.getState();
 	}
 	if( button3.serviceRisingEdge() )
 	{
@@ -254,11 +234,14 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 		Serial6.print(knob1.getState());
 		Serial6.print(" Val: ");
 		Serial6.println(analogRead(A1));
-		sprintf( knob1Str, "%3d", knob1.getAsInt16() );
-		knobStrShown = SELECT_KNOB_1;
-		glideRate = knob1.getAsInt16() * 1000;
-		startShowingKnob = 1;
-		displaySMTK.uClear();
+		int16_t newValue = knob1.getAsInt16();
+		if( newValue != lastKnob1 )
+		{
+			lastKnob1 = newValue;
+			sprintf( knob1Str, "%3d", newValue );
+			Segments.showNewValue(knob1Str);
+			glideRate = newValue * 1000;
+		}
 	}
 	if( knob3.serviceChanged() )
 	{
@@ -266,10 +249,13 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 		Serial6.print(knob3.getState());
 		Serial6.print(" Val: ");
 		Serial6.println(analogRead(A2));
-		sprintf( knob3Str, "%3d", knob3.getAsInt16() );
-		knobStrShown = SELECT_KNOB_3;
-		startShowingKnob = 1;
-		displaySMTK.uClear();
+		int16_t newValue = knob3.getAsInt16();
+		if( newValue != lastKnob3 )
+		{
+			lastKnob3 = newValue;
+			sprintf( knob3Str, "%3d", newValue );
+			Segments.showNewValue(knob3Str);
+		}
 	}
 	if( knobTempo.serviceChanged() )
 	{
@@ -277,12 +263,14 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 		Serial6.print(knobTempo.getState());
 		Serial6.print(" Val: ");
 		Serial6.println(analogRead(A2));
-		targetBPM = knobTempo.getAsInt16() * 1000;
-		//intMidiClock.setBPM(knobTempo.getAsInt16());
-		displaySMTK.uClear();
-		sprintf( knobTempoStr, "%3d", knobTempo.getAsInt16() );
-		knobStrShown = SELECT_TEMPO;
-		startShowingKnob = 1;
+		int16_t newValue = knobTempo.getAsInt16();
+		if( newValue != lastKnobTempo )
+		{
+			lastKnobTempo = newValue;		
+			targetBPM = newValue * 1000;
+			sprintf( knobTempoStr, "%3d", newValue );
+			Segments.showNewValue(knobTempoStr);
+		}
 	}
 	
 	int32_t scaledGlide = glideRate / 100;
@@ -328,97 +316,6 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 			Serial6.println(targetBPM);
 		}
 	}
-
-	switch( displayState )
-	{
-		case init:
-		{
-			displayState = idle;
-		}
-		break;
-		case idle:
-		{
-			if(startShowingKnob)
-			{
-				displayState = fadeout;
-				startShowingKnob = 0;
-			}
-		}
-		break;
-		case fadeout:
-		{
-			if( Segments.maskStream.ready() )
-			{
-				for( int i = 15; i >= 0; i--)
-				{
-					Segments.maskStream.write(&FadePixelMap[i][0]);
-				}
-				displayState = waitForFadeout;
-			}
-		}
-		break;
-		case waitForFadeout:
-		{
-			if(Segments.maskStream.empty())
-			{
-				displayState = showSelection;
-				displaySMTK.uClear();				
-			}
-		}
-		break;
-		case fadeInSelection:
-		{
-			if( Segments.maskStream.ready() )
-			{
-				for( int i = 0; i < 16; i++)
-				{
-					Segments.maskStream.write(&FadePixelMap[i][0]);
-				}
-				displayState = fadeInSelection;
-			}
-		}
-		break;
-		case showSelection:
-		{
-			switch( knobStrShown )
-			{
-				case SELECT_KNOB_1:
-				Segments.displayDrawValue(knob1Str);
-				break;
-				case SELECT_KNOB_3:
-				Segments.displayDrawValue(knob3Str);
-				break;
-				case SELECT_TEMPO:
-				Segments.displayDrawValue(knobTempoStr);
-				break;
-				default:
-				break;
-			}
-			if( displaySMTK.uGet() > 1000000 )
-			{
-				displayState = fadeOutSelection;
-			}
-		}
-		break;
-		case fadeOutSelection:
-		{
-			if( Segments.maskStream.ready() )
-			{
-				for( int i = 0; i < 16; i++)
-				{
-					Segments.maskStream.write(&FadePixelMap[i][0]);
-				}
-				displayState = idle;
-				displaySMTK.uClear();
-				startShowingKnob = 0;
-			}
-		}
-		break;
-		default:
-		displayState = init;
-		break;
-	}
-	
 }
 
 void BlinkerPanel::switchToInternalClock( void )

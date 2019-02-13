@@ -8,9 +8,9 @@
 #include "display_clock.h"
 #include "midiTime.h"
 #include "timerModule32.h"
-#include "SegmentVideo.h"
+#include "MidiClockDisplay.h"
 
-SegmentVideo Segments;
+MidiClockDisplay Segments;
 
 MidiClock extMidiClock;
 MidiClock intMidiClock;
@@ -100,13 +100,16 @@ extern void setup()
     MIDI.setHandleNoteOff(handleNoteOff);
     MIDI.begin(MIDI_CHANNEL_OMNI);
 	
-	uint8_t outputFrame[11];
+	uint8_t AllZeros[11];
+	uint8_t AllOnes[11];
 	for(int i = 0; i < 11; i++)
 	{
-		outputFrame[i] = 0x00;
+		AllZeros[i] = 0x00;
+		AllOnes[i] = 0xFF;
 	}
-	Segments.maskStream.write(outputFrame);
-	Segments.userStream.write(outputFrame);
+	Segments.valueMask_layer.write(AllZeros, AllZeros);
+	Segments.fg_layer.write(AllZeros, AllZeros);
+	Segments.noise_layer.write(AllZeros, AllZeros);
 	
 }
 
@@ -130,8 +133,8 @@ extern void loop()
 	if(mainPanelTimer.flagStatus() == PENDING)
 	{
 		convertADC();
-
 		mainPanel.tickStateMachine(10);
+		Segments.tickValueStateMachine();
 	}
 
 	if(statusPanelTimer.flagStatus() == PENDING)
@@ -152,6 +155,7 @@ extern void loop()
 	}
 	if(segmentVideoTimer.flagStatus() == PENDING)
 	{
+		Segments.processEffects();
 		Segments.writeNextFrame();
 	}
 

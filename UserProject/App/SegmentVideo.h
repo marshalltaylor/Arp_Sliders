@@ -15,7 +15,7 @@ class SegmentFrameBuffer
 {
 public:
 	SegmentFrameBuffer(void);
-	void write(const uint8_t *);
+	void write(const uint8_t * onData, const uint8_t * offData);
 	bool ready( void );
 	bool empty( void );
 	BufferChannels read( void );
@@ -30,17 +30,12 @@ class SegmentVideo
 {
 public:
 	SegmentVideo(void){};
-	void displayDrawClockNums( const char * input );
-	void displayDrawValue( const char * input );
-	void setPlayIndicator( void );
-	void clearPlayIndicator( void );
-	void toggleClockColon(void);
 	void writeNextFrame( void );
 	
-	uint8_t serialBuffer[11] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-	SegmentFrameBuffer clockStream;
-	SegmentFrameBuffer maskStream;
-	SegmentFrameBuffer userStream;
+	uint8_t textBitmap[11] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	SegmentFrameBuffer valueMask_layer;
+	SegmentFrameBuffer fg_layer;
+	SegmentFrameBuffer noise_layer;
 private:
 	uint8_t outputFrame[11];
 };

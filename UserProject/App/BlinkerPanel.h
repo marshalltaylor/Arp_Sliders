@@ -17,23 +17,12 @@ enum PStates
 	PRunning
 };
 
-typedef enum displayStates
-{
-	init,
-	idle,
-	fadeout,
-	waitForFadeout,
-	fadeInSelection,
-	showSelection,
-	fadeOutSelection
-} displayStates_t;
-
-typedef enum selectedKnobStr
-{
-	SELECT_TEMPO,
-	SELECT_KNOB_1,
-	SELECT_KNOB_3
-} selectedKnobStr_t;
+//typedef enum selectedKnobStr
+//{
+//	SELECT_TEMPO,
+//	SELECT_KNOB_1,
+//	SELECT_KNOB_3
+//} selectedKnobStr_t;
 
 class BlinkerPanel : public Panel
 {
@@ -41,9 +30,6 @@ public:
 	BlinkerPanel( void );
 	void reset( void );
 	void tickStateMachine( int msTicksDelta );
-	uint8_t getState( void ){
-		return (uint8_t)displayState;
-	}
 	void switchToInternalClock( void );
 	void switchToExternalClock( void );
 	
@@ -65,6 +51,10 @@ private:
 	Windowed10BitKnob knob1;
 	Windowed10BitKnob knob3;
 	Windowed10BitKnob knobTempo;
+	
+	int16_t lastKnob1;
+	int16_t lastKnob3;
+	int16_t lastKnobTempo;
 
 	//  ..and data
 	bool timeMaster;
@@ -72,17 +62,11 @@ private:
 	//State machine stuff  
 	PStates state;
 private:
-	displayStates_t displayState;
-	int8_t fadeLevel = 0;
-	TimeKeeper32 displaySMTK;
 	
 	char knobTempoStr[3];
 	char knob1Str[3];
 	char knob3Str[3];
 	
-	selectedKnobStr_t knobStrShown;
-	
-	bool startShowingKnob = 0;
 	
 	//knob1/glide
 	bool glideEnabled = false;

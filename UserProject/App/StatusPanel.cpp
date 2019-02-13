@@ -7,42 +7,36 @@
 #include "flagMessaging.h"
 #include "timeKeeper32.h"
 #include "BlinkerPanel.h"
-#include "SegmentVideo.h"
+#include "MidiClockDisplay.h"
 #include <MIDI.h>
 #include "midi_Defs.h"
+
 extern midi::MidiInterface<HardwareSerial> MIDI;
 
 extern MidiClock extMidiClock;
 extern MidiClock intMidiClock;
 
-extern SegmentVideo Segments;
+extern MidiClockDisplay Segments;
 
 //extern BlinkerPanel mainPanel;
 extern StatusPanel statusPanel;
 
 void StatusPanel::BeatCallback(MidiClock * caller)
 {
-	char buffer[4];
+	char buffer[5];
 	// Screen logic
 	switch(caller->getState())
 	{
-		case Stopped:
+		case Playing:
+		case Paused:
 		{
-			sprintf( buffer, "----" );
-		}
-		break;
-		case OutputOff:
-		{
-			sprintf( buffer, "    " );
+			sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
+			Segments.displayDrawClockNums(buffer);
 		}
 		break;
 		default:
-		{
-			sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
-		}
 		break;
 	}
-	Segments.displayDrawClockNums(buffer);
 
 	// LED logic
 	switch(caller->getState())
@@ -68,6 +62,25 @@ void StatusPanel::TickCallback(MidiClock * caller)
 	if(caller->outputEnabled)
 	{
 		MIDI.sendRealTime(midi::Clock);
+	}
+
+	char buffer[5];
+	switch(caller->getState())
+	{
+		case Stopped:
+		{
+			sprintf( buffer, "----" );
+			Segments.displayDrawClockNums(buffer);
+		}
+		break;
+		case OutputOff:
+		{
+			sprintf( buffer, "    " );
+			Segments.displayDrawClockNums(buffer);
+		}
+		break;
+		default:
+		break;
 	}
 
 }

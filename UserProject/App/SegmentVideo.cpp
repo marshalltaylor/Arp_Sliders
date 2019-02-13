@@ -2,8 +2,6 @@
 #include "SegmentVideo.h"
 #include "Arduino.h"
 
-static uint8_t segmentMap[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x00, 0x00};
-
 SegmentFrameBuffer::SegmentFrameBuffer(void){
 	for(int i = 0; i < 11; i++)
 	{
@@ -35,7 +33,7 @@ BufferChannels SegmentFrameBuffer::read( void )
 }
 
 
-void SegmentFrameBuffer::write(const uint8_t * data)
+void SegmentFrameBuffer::write(const uint8_t * onData, const uint8_t * offData)
 {
 	if(nextToWrite == outputPtr)
 	{
@@ -44,8 +42,8 @@ void SegmentFrameBuffer::write(const uint8_t * data)
 	}
 	for(int i = 0; i < 11; i++)
 	{
-		onBuffer[nextToWrite][i] = data[i];//*(data + i);
-		offBuffer[nextToWrite][i] = data[i];
+		onBuffer[nextToWrite][i] = onData[i];
+		offBuffer[nextToWrite][i] = offData[i];
 		//onBuffer[nextToWrite][i] = testData[i];
 		//offBuffer[nextToWrite][i] = testData[i];
 		//onBuffer[nextToWrite][i] = 0x03;
@@ -96,64 +94,23 @@ bool SegmentFrameBuffer::empty( void )
 
 
 
-void SegmentVideo::displayDrawClockNums( const char * input )
-{
-	for( int i = 0; i < 4; i++ )
-	{
-		serialBuffer[i + 7] = 0x00;
-		if( *(input + i) == '-' )
-		{
-			serialBuffer[i + 7] = 0x40;
-		}
-		else if((*(input + i) >= 0x30)&&(*(input + i) < 0x3A))
-		{
-			serialBuffer[i + 7] = segmentMap[*(input + i) - 0x30];
-		}
-	}
-	clockStream.write(serialBuffer);
-}
-
-void SegmentVideo::displayDrawValue( const char * input )
-{
-	for( int i = 0; i < 3; i++ )
-	{
-		serialBuffer[i + 2] = 0x00;
-		if((*(input + i) >= 0x30)&&(*(input + i) < 0x3A))
-		{
-			serialBuffer[i + 2] = segmentMap[*(input + i) - 0x30];
-		}
-	}
-	clockStream.write(serialBuffer);
-}
-
-void SegmentVideo::setPlayIndicator( void )
-{
-	serialBuffer[0] |= 0x80;
-	clockStream.write(serialBuffer);
-}
-
-void SegmentVideo::clearPlayIndicator( void )
-{
-	serialBuffer[0] &= ~0x80;
-	clockStream.write(serialBuffer);
-}
-
-void SegmentVideo::toggleClockColon(void)
-{
-	serialBuffer[0] ^= 0x08;
-	clockStream.write(serialBuffer);
-}
-
 void SegmentVideo::writeNextFrame(void)
 {
-	BufferChannels nextClockFrame;
-	//uint8_t * nextMaskFrame;
-	//maskStream.read(nextMaskFrame, dummy);
-	//uint8_t * nextClockFrame;
-	nextClockFrame = clockStream.read();
+	BufferChannels nextValueMaskFrame;
+	nextValueMaskFrame = valueMask_layer.read();
+	BufferChannels nextFGFrame;
+	nextFGFrame = fg_layer.read();
+	BufferChannels nextNoiseFrame;
+	nextNoiseFrame = noise_layer.read();
+	
 	for(int i = 0; i < 11; i++)
 	{
-		outputFrame[i] = nextClockFrame.onBufferPtr[i];
+		outputFrame[i] = textBitmap[i];
+		outputFrame[i] &= ~nextValueMaskFrame.offBufferPtr[i];
+		outputFrame[i] |= nextValueMaskFrame.onBufferPtr[i];
+		//outputFrame[i] = nextFGFrame.onBufferPtr[i];
+		outputFrame[i] &= ~nextNoiseFrame.offBufferPtr[i];
+		outputFrame[i] |= nextNoiseFrame.onBufferPtr[i];
 	}	
 	writeDisplay(outputFrame);
 }
