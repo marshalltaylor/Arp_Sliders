@@ -27,7 +27,7 @@ void StatusPanel::BeatCallback(MidiClock * caller)
 		case Playing:
 		case Paused:
 		{
-			sprintf( buffer, "%2d%2d", caller->ticksToMeasures(caller->ticks), caller->ticksToQuarterNotes(caller->ticks) );
+			sprintf( buffer, "%2d%2d", (int)caller->ticksToMeasures(caller->ticks), (int)caller->ticksToQuarterNotes(caller->ticks) );
 			Segments.displayDrawClockNums(buffer);
 		}
 		break;

@@ -107,11 +107,11 @@ extern void setup()
     MIDI.begin(MIDI_CHANNEL_OMNI);
 	
 	uint8_t AllZeros[11];
-	uint8_t AllOnes[11];
+	//uint8_t AllOnes[11];
 	for(int i = 0; i < 11; i++)
 	{
 		AllZeros[i] = 0x00;
-		AllOnes[i] = 0xFF;
+		//AllOnes[i] = 0xFF;
 	}
 	Segments.valueMask_layer.write(AllZeros, AllZeros);
 	Segments.fg_layer.write(AllZeros, AllZeros);

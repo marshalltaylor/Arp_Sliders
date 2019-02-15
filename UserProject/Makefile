@@ -63,7 +63,7 @@ CFLAGS = -v -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32F4
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 # Message behavior
-# -Werror -fsyntax-only -fmax-errors=1 -w
+# -fsyntax-only -fmax-errors=1 -w -Werror 
 CFLAGS += -fmax-errors=1
 
 # cpp
@@ -106,13 +106,13 @@ vpath %.s $(sort $(dir $(HAL_C_SOURCES)))
 
 $(BUILD_DIR)/PROJECT/%.o: %.cpp
 	@echo "***** ***** ***** input = $^, output = $@***** ***** *****"
-	$(PP) $(CPPFLAGS) $(addprefix -I,$(PROJECT_INCLUDES)) $< -o $@
+	$(PP) $(CPPFLAGS) -Werror  $(addprefix -I,$(PROJECT_INCLUDES)) $< -o $@
 	@echo
 	@echo
 
 $(BUILD_DIR)/PROJECT/%.o: %.c
 	@echo "***** ***** ***** input = $^, output = $@***** ***** *****"
-	$(CC) $(CFLAGS) $(addprefix -I,$(PROJECT_INCLUDES))  $< -o $@
+	$(CC) $(CFLAGS) -Werror  $(addprefix -I,$(PROJECT_INCLUDES))  $< -o $@
 	@echo
 	@echo
 
