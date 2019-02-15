@@ -2,9 +2,7 @@
 #include "display_clock.h"
 #include "midiTime.h"
 #include "interface.h"
-#include "StatusPanel.h"
 
-extern StatusPanel statusPanel;
 extern MidiClock intMidiClock;
 
 
@@ -48,26 +46,18 @@ void MidiClock::incrementTick(void)
 	processCallbacks();
 }
 
-void MidiClock::enableOutput(void)
-{
-	outputEnabled = true;
-}
-
-void MidiClock::disableOutput(void)
-{
-	outputEnabled = false;
-}
-
 void MidiClock::setTickCount( uint32_t input )
 {
 	ticks = input;
 }
 
+// The clock has no logic.  This configures it playing/paused etc.
 void MidiClock::setState( PlayState_t input )
 {
 	playState = input;
 }
 
+// Things that use the clock read this to decide what to do.
 PlayState_t MidiClock::getState(void)
 {
 	return playState;
@@ -102,7 +92,6 @@ void MidiClock::processCallbacks( void )
 	int16_t ticksOfQuarterNote = ticks % 24;
 	if( ticksOfQuarterNote == 1 )
 	{
-		//statusPanel.beat();
 		if(BeatCallback != NULL)
 		{
 			BeatCallback(this);
@@ -110,33 +99,32 @@ void MidiClock::processCallbacks( void )
 	}
 }
 
-void MidiClock::hwTimerCallback(void)
-{
-	// Things!
-	intMidiClock.incrementTime_uS(100);
-}
-
 MidiClockSocket::MidiClockSocket(void)
 {
 	
 }
 
+void MidiClockSocket::SwitchMidiClock(MidiClock * inputClock)
+{
+	if( socketed != NULL )
+	{
+		// Teardown current clock
+		socketed->BeatCallback = NULL;
+		socketed->TickCallback = NULL;
+	}
+	// Insert new one
+	socketed = inputClock;
+	if( socketed != NULL )
+	{
+		// set callbacks
+		socketed->BeatCallback = BeatCallback;
+		socketed->TickCallback = TickCallback;
+	}
+}
+
 MidiClock * MidiClockSocket::getSocketedClock(void)
 {
 	return socketed;
-}
-
-void MidiClockSocket::SwitchMidiClock(MidiClock * inputClock)
-{
-	// Teardown current clock
-	socketed->BeatCallback = NULL;
-	socketed->TickCallback = NULL;
-	// Insert new one
-	socketed = inputClock;
-	// set callbacks
-	socketed->BeatCallback = BeatCallback;
-	socketed->TickCallback = TickCallback;
-	
 }
 
 // This sets the socket's callback

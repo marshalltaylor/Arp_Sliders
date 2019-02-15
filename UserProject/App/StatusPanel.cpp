@@ -13,9 +13,6 @@
 
 extern midi::MidiInterface<HardwareSerial> MIDI;
 
-extern MidiClock extMidiClock;
-extern MidiClock intMidiClock;
-
 extern MidiClockDisplay Segments;
 
 //extern BlinkerPanel mainPanel;
@@ -58,17 +55,12 @@ void StatusPanel::BeatCallback(MidiClock * caller)
 
 void StatusPanel::TickCallback(MidiClock * caller)
 {
-	//Send midi
-	if(caller->outputEnabled)
-	{
-		MIDI.sendRealTime(midi::Clock);
-	}
-
 	char buffer[5];
 	switch(caller->getState())
 	{
 		case Stopped:
 		{
+			MIDI.sendRealTime(midi::Clock);
 			sprintf( buffer, "----" );
 			Segments.displayDrawClockNums(buffer);
 		}
@@ -78,8 +70,11 @@ void StatusPanel::TickCallback(MidiClock * caller)
 			sprintf( buffer, "    " );
 			Segments.displayDrawClockNums(buffer);
 		}
-		break;
 		default:
+		case Paused:
+		case Playing:
+			MIDI.sendRealTime(midi::Clock);
+		break;
 		break;
 	}
 
@@ -103,8 +98,8 @@ void StatusPanel::reset( void )
 	ledBeat.setState(LEDOFF);
 	ledPlay.setState(LEDOFF);
 	beatLedState = BeatLedStateInit;
-	ClockSocket->socketed = NULL;
-	
+	// Construction order screws this up... it shouldn't be here anyway
+	//ClockSocket->SwitchMidiClock(NULL);
 }
 
 void StatusPanel::tickStateMachine( int usTicksDelta )
@@ -116,7 +111,7 @@ void StatusPanel::tickStateMachine( int usTicksDelta )
 	freshenComponents( 1 );
 	
 	//***** PROCESS THE LOGIC *****//
-	MidiClock * clock = ClockSocket->socketed;
+	MidiClock * clock = ClockSocket->getSocketedClock();
 	
 	//Now do the states.
 	switch( beatLedState )

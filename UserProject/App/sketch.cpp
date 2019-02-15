@@ -71,6 +71,12 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 	//digitalWrite(D6, 1);
 }
 
+void hwTimerCallback(void)
+{
+	// Things!
+	intMidiClock.incrementTime_uS(100);
+}
+
 extern void setup()
 {
 	//pinMode(D6, OUTPUT);
@@ -82,7 +88,7 @@ extern void setup()
 	intMidiClock.setBPM(100);
 	// Write our function address into the hw timer
 	//timer3TickCallback = &MidiClock::hwTimerCallback;
-	timer3TickCallback = intMidiClock.hwTimerCallback;
+	timer3TickCallback = hwTimerCallback;
 	//Go to fresh state
 	mainPanel.reset();
 	statusPanel.reset();
@@ -148,7 +154,8 @@ extern void loop()
 	{
 		//User code
 		char buffer[200] = {0};
-		sprintf(buffer, "__DEBUG______\nintPlayState = %d, intOE = %d\nextPlayState = %d, extOE = %d\nbeatState = %d, playLed = %d\nFreeStack() = %d\n\n", intMidiClock.playState, intMidiClock.outputEnabled, extMidiClock.playState, extMidiClock.outputEnabled, statusPanel.beatLedState, statusPanel.playLedState, FreeStack());
+		sprintf(buffer, "__DEBUG______\nintPlayState = %d, extPlayState = %d\nbeatLedState = %d, playLedState = %d\nFreeStack() = %d\n\n", intMidiClock.getState(), extMidiClock.getState(), statusPanel.getBeatLedState(), statusPanel.getPlayLedState(), FreeStack());
+		//sprintf(buffer, "__DEBUG__");
 		Serial6.print(buffer);
 		//Serial6.println(mainPanel.getState());
 		//Serial6.print("Playing: ");

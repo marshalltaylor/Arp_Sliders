@@ -99,7 +99,7 @@ void BlinkerPanel::tickStateMachine( int msTicksDelta )
 	freshenComponents( msTicksDelta );
 	Segments.displaySMTK.uIncrement( msTicksDelta * 1000 );
 	//***** PROCESS THE LOGIC *****//
-	MidiClock * clock = statusPanel.ClockSocket->socketed;
+	MidiClock * clock = statusPanel.ClockSocket->getSocketedClock();
 	//Now do the states.
 	PStates nextState = state;
 	switch( state )

@@ -19,20 +19,21 @@ class MidiClockDisplay : public SegmentVideo
 {
 public:
 	MidiClockDisplay(void){};
+	
+	//Graphics
 	void displayDrawClockNums( const char * input );
 	void displayDrawValue( const char * input );
 	void setPlayIndicator( void );
 	void clearPlayIndicator( void );
 	void toggleClockColon(void);
 	
+	void showNewValue( const char * input );
 	void processEffects(void);
 	bool debugNoise = false;
 	
-	void showNewValue( const char * input );
+	//State machine
 	void tickValueStateMachine( void );
-	uint8_t getValueState( void ){
-		return (uint8_t)displayState;
-	}
+	uint8_t getValueState( void );
 	
 	TimeKeeper32 displaySMTK;
 private:

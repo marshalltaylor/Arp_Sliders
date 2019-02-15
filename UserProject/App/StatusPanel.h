@@ -31,18 +31,20 @@ public:
 	StatusPanel( void );
 	void reset( void );
 	void tickStateMachine( int msTicksDelta );
-	uint8_t getState( void ){
+	uint8_t getBeatLedState( void ){
 		return (uint8_t)beatLedState;
 	}
-
+	uint8_t getPlayLedState( void ){
+		return (uint8_t)beatLedState;
+	}
 	MidiClockSocket * ClockSocket;
 	static void BeatCallback(MidiClock *);
 	static void TickCallback(MidiClock *);
 
+private:
 	//State machine stuff  
 	BeatLedStates beatLedState;
 	PlayLedStates playLedState;
-private:
 	//Internal Panel Components
 	Led ledBeat;
 	Led ledPlay;
@@ -53,7 +55,6 @@ private:
 	
 	TimeKeeper32 beatTimeKeeper;
 	TimeKeeper32 playTimeKeeper;
-	
 
 };
 

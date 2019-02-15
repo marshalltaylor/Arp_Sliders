@@ -213,4 +213,7 @@ void MidiClockDisplay::tickValueStateMachine( void )
 		break;
 	}
 }
-	
+
+uint8_t MidiClockDisplay::getValueState( void ){
+	return (uint8_t)displayState;
+}
