@@ -1,16 +1,12 @@
 #include "Arduino.h"
-#include "BlinkerPanel.h"
-#include "StatusPanel.h"
+#include "SlidersPanel.h"
 #include "sketch.h"
 #include <MIDI.h>
 #include "adc_ext.h"
 
-#include "display_clock.h"
 #include "midiTime.h"
 #include "timerModule32.h"
-#include "MidiClockDisplay.h"
 
-MidiClockDisplay Segments;
 
 MidiClock extMidiClock;
 MidiClock intMidiClock;
@@ -18,15 +14,13 @@ MidiClockSocket clockSocket;
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
 
-BlinkerPanel mainPanel;
-StatusPanel statusPanel;
+SlidersPanel mainPanel;
 
 uint16_t debugCounter = 0;
 
 TimerClass32 debugTimer( 1000000 ); //1 second
 TimerClass32 mainPanelTimer( 10000 );
-TimerClass32 statusPanelTimer( 400 );
-TimerClass32 segmentVideoTimer( 5000 );
+//TimerClass32 statusPanelTimer( 400 );
 
 #if defined(__arm__)
 extern "C" char* sbrk(int incr);
@@ -77,6 +71,8 @@ void hwTimerCallback(void)
 	intMidiClock.incrementTime_uS(100);
 }
 
+static void sketchTickCallback(MidiClock * caller);
+
 extern void setup()
 {
 	//pinMode(D6, OUTPUT);
@@ -91,12 +87,10 @@ extern void setup()
 	timer3TickCallback = hwTimerCallback;
 	//Go to fresh state
 	mainPanel.reset();
-	statusPanel.reset();
 	
-	clockSocket.SetBeatCallback(statusPanel.BeatCallback);
-	clockSocket.SetTickCallback(statusPanel.TickCallback);
+	//clockSocket.SetBeatCallback(statusPanel.BeatCallback);
+	clockSocket.SetTickCallback(sketchTickCallback);
 	clockSocket.SwitchMidiClock(&extMidiClock);
-	statusPanel.ClockSocket = &clockSocket;
 
 	MIDI.setHandleClock(handleClock);
 	MIDI.setHandleStart(handleStart);
@@ -105,17 +99,6 @@ extern void setup()
 	MIDI.setHandleNoteOn(handleNoteOn);  // Put only the name of the function
     MIDI.setHandleNoteOff(handleNoteOff);
     MIDI.begin(MIDI_CHANNEL_OMNI);
-	
-	uint8_t AllZeros[11];
-	//uint8_t AllOnes[11];
-	for(int i = 0; i < 11; i++)
-	{
-		AllZeros[i] = 0x00;
-		//AllOnes[i] = 0xFF;
-	}
-	Segments.valueMask_layer.write(AllZeros, AllZeros);
-	Segments.fg_layer.write(AllZeros, AllZeros);
-	Segments.noise_layer.write(AllZeros, AllZeros);
 	
 }
 
@@ -130,8 +113,7 @@ extern void loop()
 	{
 		mainPanelTimer.update(usTicks);
 		debugTimer.update(usTicks);
-		statusPanelTimer.update(usTicks);
-		segmentVideoTimer.update(usTicks);
+		//statusPanelTimer.update(usTicks);
 		//Done?  Lock it back up
 		usTicksLocked = 1;
 	}  //The ISR will unlock.
@@ -140,33 +122,52 @@ extern void loop()
 	{
 		convertADC();
 		mainPanel.tickStateMachine(10);
-		Segments.tickValueStateMachine();
 	}
 
-	if(statusPanelTimer.flagStatus() == PENDING)
-	{
-		statusPanel.tickStateMachine(400);
-		//intMidiClock.incrementTime_uS(400);
-		intMidiClock.service();
-	}
+//	if(statusPanelTimer.flagStatus() == PENDING)
+//	{
+//		statusPanel.tickStateMachine(400);
+//		//intMidiClock.incrementTime_uS(400);
+//		intMidiClock.service();
+//	}
 	
 	if(debugTimer.flagStatus() == PENDING)
 	{
 		//User code
 		char buffer[200] = {0};
-		sprintf(buffer, "__DEBUG______\nintPlayState = %d, extPlayState = %d\nbeatLedState = %d, playLedState = %d\nFreeStack() = %d\n\n", intMidiClock.getState(), extMidiClock.getState(), statusPanel.getBeatLedState(), statusPanel.getPlayLedState(), FreeStack());
-		//sprintf(buffer, "__DEBUG__");
+		//sprintf(buffer, "__DEBUG______\nintPlayState = %d, extPlayState = %d\nbeatLedState = %d, playLedState = %d\nFreeStack() = %d\n\n", intMidiClock.getState(), extMidiClock.getState(), statusPanel.getBeatLedState(), statusPanel.getPlayLedState(), FreeStack());
+		sprintf(buffer, "__DEBUG__\nFreeStack() = %d\n", FreeStack());
 		Serial6.print(buffer);
+		mainPanel.printDebug();
 		//Serial6.println(mainPanel.getState());
 		//Serial6.print("Playing: ");
 	}
-	if(segmentVideoTimer.flagStatus() == PENDING)
-	{
-		Segments.processEffects();
-		Segments.writeNextFrame();
-	}
-
 	
 }
 
+void sketchTickCallback(MidiClock * caller)
+{
+	//char buffer[5];
+	switch(caller->getState())
+	{
+		case Stopped:
+		{
+			MIDI.sendRealTime(midi::Clock);
+			//sprintf( buffer, "----" );
+			//Segments.displayDrawClockNums(buffer);
+		}
+		break;
+		case OutputOff:
+		{
+			//sprintf( buffer, "    " );
+			//Segments.displayDrawClockNums(buffer);
+		}
+		default:
+		case Paused:
+		case Playing:
+			MIDI.sendRealTime(midi::Clock);
+		break;
+		break;
+	}
 
+}

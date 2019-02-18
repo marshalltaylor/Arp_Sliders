@@ -17,21 +17,15 @@ enum PStates
 	PRunning
 };
 
-//typedef enum selectedKnobStr
-//{
-//	SELECT_TEMPO,
-//	SELECT_KNOB_1,
-//	SELECT_KNOB_3
-//} selectedKnobStr_t;
-
-class BlinkerPanel : public Panel
+class SlidersPanel : public Panel
 {
 public:
-	BlinkerPanel( void );
+	SlidersPanel( void );
 	void reset( void );
 	void tickStateMachine( int msTicksDelta );
 	void switchToInternalClock( void );
 	void switchToExternalClock( void );
+	void printDebug( void );
 	
 private:
 	//Internal Panel Components
@@ -47,10 +41,24 @@ private:
 	Led led3;
 	Led led4;
 	Led ledPlay;
+
+	Button sw1Up;
+	Button sw2Up;
+	Button sw3Up;
+	Button sw4Up;
+	Button sw5Up;
+	Button sw1Down;
+	Button sw2Down;
+	Button sw3Down;
+	Button sw4Down;
+	Button sw5Down;
 	
-	Windowed10BitKnob knob1;
-	Windowed10BitKnob knob3;
-	Windowed10BitKnob knobTempo;
+	Windowed10BitKnob slider1;
+	Windowed10BitKnob slider2;
+	Windowed10BitKnob slider3;
+	Windowed10BitKnob slider4;
+	Windowed10BitKnob slider5;
+	Windowed10BitKnob slider6;
 	
 	int16_t lastKnob1;
 	int16_t lastKnob3;

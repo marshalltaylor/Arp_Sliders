@@ -46,10 +46,8 @@ PROJECT_C_SOURCES = \
 ./App/App.cpp \
 ./App/sketch.cpp \
 ./App/midiTime.cpp \
-./App/BlinkerPanel.cpp \
-./App/StatusPanel.cpp \
-./App/SegmentVideo.cpp \
-./App/MidiClockDisplay.cpp
+./App/SlidersPanel.cpp
+
 
 PROJECT_C_INCLUDES = \
 ./Core/Inc \

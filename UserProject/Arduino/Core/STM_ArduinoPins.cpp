@@ -39,18 +39,18 @@ const uint32_t DxToPort[] = {
 	PORTC_OFFSET,   //D21/A5
 	PORTC_OFFSET,   //D22 User btn
 	PORTC_OFFSET,   //D23 ST-Link Rx (MCU to VCP) huart6
-	PORTC_OFFSET,   //D24 in
-	PORTC_OFFSET,   //D25 in
-	PORTA_OFFSET,   //D26 in
-	PORTB_OFFSET,   //D27 in
-	PORTC_OFFSET,   //D28 in
-	PORTC_OFFSET,   //D29 in
-	PORTC_OFFSET,   //D30 in
-	PORTC_OFFSET,   //D31 out
-	PORTD_OFFSET,   //D32 out
-	PORTB_OFFSET,   //D33 out
+	PORTC_OFFSET,   //D24 in, sw 1 up
+	PORTC_OFFSET,   //D25 in, sw 2 up
+	PORTA_OFFSET,   //D26 in, sw 3 up
+	PORTA_OFFSET,   //D27 in, sw 4 up
+	PORTB_OFFSET,   //D28 in, sw 5 up
+	PORTB_OFFSET,   //D29 in, sw 1 down
+	PORTB_OFFSET,   //D30 in, sw 2 down
+	PORTB_OFFSET,   //D31 in, sw 3 down
+	PORTB_OFFSET,   //D32 in, sw 4 down
+	PORTB_OFFSET,   //D33 in, sw 5 down
 	PORTC_OFFSET,   //D34 out
-	PORTC_OFFSET    //D35 out
+	PORTD_OFFSET    //D35 out
 };
 
 const uint32_t DxToPin[] = {
@@ -78,18 +78,18 @@ const uint32_t DxToPin[] = {
 	GPIO_PIN_0,    //D21/A5
 	GPIO_PIN_13,   //D22 User btn
 	GPIO_PIN_6,    //D23 ST-Link Rx (MCU to VCP)huart6
-	GPIO_PIN_10,   //D24 in
-	GPIO_PIN_12,   //D25 in
-	GPIO_PIN_15,   //D26 in
-	GPIO_PIN_7,    //D27 in
-	GPIO_PIN_13,   //D28 in
-	GPIO_PIN_2,    //D29 in
-	GPIO_PIN_3,    //D30 in
-	GPIO_PIN_11,   //D31 out
-	GPIO_PIN_2,    //D32 out
-	GPIO_PIN_0,    //D33 out
-	GPIO_PIN_1,    //D34 out
-	GPIO_PIN_0     //D35 out
+	GPIO_PIN_8,    //D24 in, sw 1 up
+	GPIO_PIN_5,    //D25 in, sw 2 up
+	GPIO_PIN_12,   //D26 in, sw 3 up
+	GPIO_PIN_11,   //D27 in, sw 4 up
+	GPIO_PIN_12,   //D28 in, sw 5 up
+	GPIO_PIN_2,    //D29 in, sw 1 down
+	GPIO_PIN_1,    //D30 in, sw 2 down
+	GPIO_PIN_15,   //D31 in, sw 3 down
+	GPIO_PIN_14,   //D32 in, sw 4 down
+	GPIO_PIN_13,   //D33 in, sw 5 down
+	GPIO_PIN_11,   //D34 out
+	GPIO_PIN_2     //D35 out
 };
 
 #ifdef __cplusplus

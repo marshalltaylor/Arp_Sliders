@@ -76,6 +76,8 @@ extern "C"{
 #define D21 21
 #define D22 22
 #define D23 23
+
+//Start nucleo user pins
 #define D24 24
 #define D25 25
 #define D26 26

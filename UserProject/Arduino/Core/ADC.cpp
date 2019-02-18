@@ -56,6 +56,9 @@ uint32_t analogRead(uint32_t ulPin)
   if(ulPin == A0) value = adcValues[0];
   if(ulPin == A1) value = adcValues[1];
   if(ulPin == A2) value = adcValues[2];
+  if(ulPin == A3) value = adcValues[3];
+  if(ulPin == A4) value = adcValues[4];
+  if(ulPin == A5) value = adcValues[5];
 //  PinName p = analogInputToPinName(ulPin);
 //  if(p != NC) {
 //    value = adc_read_value(p);
