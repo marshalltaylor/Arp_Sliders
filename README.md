@@ -1,12 +1,14 @@
-# MIDI clock
-The midi clock is a device that can accept and generate midi clock messages.  The hardware is a STM32F466 dev board with midi shield and controls.
+# Arp Sliders
+This device generates arpeggiations on input midi notes.  A second keyboard can be used to configure the arpeggiations for when a looper is at the other channel.  The hardware is a STM32F466 dev board with midi shield and controls.
+
 ## Status
-Tested with Roland products and is working.  The 7 segment driver is pretty crazy, but not really a reusable part.  The project really focused on creating a clock object that can be fit into a socket object, with callbacks both ways.  This forced removal of control mechanisms from the clock object making it purely reactive.  The controls are wired to the socket as an interface.
+Work in progress!
+
 * Core -- healthy.  A cubeMX project can be generated independently of the project and compared.
 * Serial -- Debug interface shows basic data
-* Midi -- OK but edge cases haven't been found.  Needs bench testing
-* ADC -- On but not really configured
-* Display -- Crazy, over-baked framebuffer objects
+* Midi -- Working but doesn't really do anything
+* ADC -- On but not really configured, now 6 channels are active
+* Switches -- panel buttons for now but active
 
 ## General Commands
 Use `make` to build.
@@ -22,3 +24,7 @@ OpenOCD:
 gcb (run from make directory)
 
 `C:/STM32/gcc-arm-none-eabi/bin/arm-none-eabi-gdb -x gdbinit.txt build/output.elf`
+
+## Architecture
+
+<img src="https://raw.githubusercontent.com/marshalltaylor/Arp_Sliders/master/Documentation/dataflow.png">

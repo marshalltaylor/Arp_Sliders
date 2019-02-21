@@ -35,28 +35,6 @@ SlidersPanel::SlidersPanel( void )
 	add( &sw4Up );
 	add( &sw5Up );
 	
-	//button4.setHardware(new ArduinoDigitalIn( D25 ), 1);
-	//add( &button4 );
-	//button3.setHardware(new ArduinoDigitalIn( D26 ), 1);
-	//add( &button3 );
-	//button2.setHardware(new ArduinoDigitalIn( D27 ), 1);
-	//add( &button2 );
-	//button1.setHardware(new ArduinoDigitalIn( D28 ), 1);
-	//add( &button1 );
-	//stop.setHardware(new ArduinoDigitalIn( D29 ), 1);
-	//add( &stop );
-	//play.setHardware(new ArduinoDigitalIn( D30 ), 1);
-	//add( &play );
-    //
-	//led1.setHardware(new ArduinoDigitalOut( D32 ), 1);
-	//add( &led1 );
-	//led2.setHardware(new ArduinoDigitalOut( D31 ), 1);
-	//add( &led2 );
-	//led3.setHardware(new ArduinoDigitalOut( D33 ), 1);
-	//add( &led3 );
-	//led4.setHardware(new ArduinoDigitalOut( D10 ), 1);
-	//add( &led4 );
-
 	slider1.setHardware(new ArduinoAnalogIn( A0 ));
 	add( &slider1 );
 	slider1.setLowerKnobVal(250);
@@ -112,15 +90,10 @@ SlidersPanel::SlidersPanel( void )
 void SlidersPanel::reset( void )
 {
 	//Set explicit states
-	//Set all LED off
-	led1.setState(LEDOFF);
-	led2.setState(LEDOFF);
-	led3.setState(LEDOFF);
-	led4.setState(LEDOFF);
 	state = PInit;
 	
 	// timeMaster = true; //overridden by switchTo...
-	switchToInternalClock();
+	//switchToInternalClock();
 	
 	currentBPM = 100;// knobTempo.getAsInt16() * 1000;
 	targetBPM = currentBPM;

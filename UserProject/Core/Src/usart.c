@@ -48,6 +48,7 @@
 #include "debugPins.h" // traceWrite(NAVY, 1);
 UartInstance_t VCP_UART;
 UartInstance_t D01_UART;
+UartInstance_t PA9_10_UART;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -61,21 +62,35 @@ DMA_HandleTypeDef hdma_usart6_tx;
 
 void MX_USART1_UART_Init(void)
 {
+  PA9_10_UART.huart = &huart1;
+  PA9_10_UART.hdma_tx = &hdma_usart1_tx;
+  
+  PA9_10_UART.txDataBuffer_head = 0;
+  PA9_10_UART.txDataBuffer_next = 0;
+  PA9_10_UART.txDataBuffer_tail = 0;
 
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 31250;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
+  PA9_10_UART.rxDataBuffer_first = 0;
+  PA9_10_UART.rxDataBuffer_last = 0;
+  PA9_10_UART.rxDataBuffer[0] = 0;
+  
+  PA9_10_UART.UartTxInProgress = false;
+  
+  PA9_10_UART.huart->Instance = USART1;
+  PA9_10_UART.huart->Init.BaudRate = 31250;
+  PA9_10_UART.huart->Init.WordLength = UART_WORDLENGTH_8B;
+  PA9_10_UART.huart->Init.StopBits = UART_STOPBITS_1;
+  PA9_10_UART.huart->Init.Parity = UART_PARITY_NONE;
+  PA9_10_UART.huart->Init.Mode = UART_MODE_TX_RX;
+  PA9_10_UART.huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  PA9_10_UART.huart->Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(PA9_10_UART.huart) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+  HAL_UART_Receive_IT(PA9_10_UART.huart, &PA9_10_UART.rxCharBuffer, 1);
 
 }
+
 /* USART2 init function */
 
 void MX_USART2_UART_Init(void)
@@ -110,6 +125,7 @@ void MX_USART2_UART_Init(void)
   //__HAL_UART_ENABLE_IT(D01_UART.huart, UART_IT_RXNE);
 
 }
+
 /* USART6 init function */
 
 void MX_USART6_UART_Init(void)
@@ -439,7 +455,17 @@ uint16_t halUartReadBytesAvailable(UartInstance_t * UART)
   */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
-  if(UartHandle->Instance==USART2)
+  if(UartHandle->Instance==USART1)
+  {
+    /* Set transmission flag: trasfer complete*/
+    PA9_10_UART.UartTxInProgress = false;
+    PA9_10_UART.txDataBuffer_head = PA9_10_UART.txDataBuffer_next;
+    if(PA9_10_UART.txDataBuffer_next != PA9_10_UART.txDataBuffer_tail)
+    {
+	    uartQueueNextData(&PA9_10_UART);
+    }
+  }
+  else if(UartHandle->Instance==USART2)
   {
     /* Set transmission flag: trasfer complete*/
     D01_UART.UartTxInProgress = false;
@@ -473,7 +499,19 @@ DebugObject_t usrUartDB;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	traceWrite(YELLOW, 1);
-  if(UartHandle->Instance==USART2)
+  if(UartHandle->Instance==USART1)
+  {
+	PA9_10_UART.rxDataBuffer[PA9_10_UART.rxDataBuffer_last] = PA9_10_UART.rxCharBuffer;
+	PA9_10_UART.rxDataBuffer_last++;
+	if( PA9_10_UART.rxDataBuffer_last >= RX_BUFFER_SIZE )
+	{
+		PA9_10_UART.rxDataBuffer_last = 0;
+	}
+	//Queue another rx transfer
+	HAL_UART_Receive_IT(&huart1, &PA9_10_UART.rxCharBuffer, 1);
+
+  }
+  else if(UartHandle->Instance==USART2)
   {
 	traceWrite(CYAN, 1);
 	D01_UART.rxDataBuffer[D01_UART.rxDataBuffer_last] = D01_UART.rxCharBuffer;
@@ -527,7 +565,11 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
 	if(UartHandle->ErrorCode == HAL_UART_ERROR_DMA)
 	{
 		//Whatev's, kick it with a fresh buffer
-		if(UartHandle->Instance==USART2)
+		if(UartHandle->Instance==USART1)
+		{
+			//while(1);
+		}
+		else if(UartHandle->Instance==USART2)
 		{
 			//while(1);
 			//Queue another rx transfer

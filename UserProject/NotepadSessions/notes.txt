@@ -22,9 +22,10 @@ HAL.xml
 
 
 C:\Users\marshall>
-openocd -f "e:\github\Midi_Clock\UserProject\usbDebug.cfg" -c "init; reset halt"
+openocd -f "e:\github\Arp_Sliders\UserProject\usbDebug.cfg" -c "init; reset halt"
 
-E:\github\Midi_Clock\UserProject>
+e:
+cd \github\Arp_Sliders\UserProject
 C:/STM32/gcc-arm-none-eabi/bin/arm-none-eabi-gdb -x gdbinit.txt build/output.elf
 
 https://www.youtube.com/watch?v=KYfADOlstwc

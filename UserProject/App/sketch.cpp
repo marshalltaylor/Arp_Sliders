@@ -13,6 +13,7 @@ MidiClock intMidiClock;
 MidiClockSocket clockSocket;
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, CtrlMIDI);
 
 SlidersPanel mainPanel;
 
@@ -30,6 +31,7 @@ static int FreeStack() {
 }
 #endif
 
+/***** Main MIDI Callbacks ****************************************************/
 void handleClock( void )
 {
 	extMidiClock.incrementTick();
@@ -65,46 +67,92 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 	//digitalWrite(D6, 1);
 }
 
+/***** Control MIDI Callbacks *************************************************/
+void handleAltClock( void )
+{
+	//extMidiClock.incrementTick();
+	Serial6.println("Alt Clock");
+}
+
+/***** Hardware Timer Callbacks ***********************************************/
 void hwTimerCallback(void)
 {
 	// Things!
 	intMidiClock.incrementTime_uS(100);
 }
 
-static void sketchTickCallback(MidiClock * caller);
+/***** Clock Socket Callbacks *************************************************/
+void sketchBeatCallback(MidiClock * caller)
+{
+	Serial6.print("....beat\n");
+}
 
+void sketchTickCallback(MidiClock * caller)
+{
+	//char buffer[5];
+	switch(caller->getState())
+	{
+		case Stopped:
+		{
+			MIDI.sendRealTime(midi::Clock);
+			//sprintf( buffer, "----" );
+			//Segments.displayDrawClockNums(buffer);
+		}
+		break;
+		case OutputOff:
+		{
+			//sprintf( buffer, "    " );
+			//Segments.displayDrawClockNums(buffer);
+		}
+		default:
+		case Paused:
+		case Playing:
+			MIDI.sendRealTime(midi::Clock);
+		break;
+		break;
+	}
+
+}
+
+/***** Program ****************************************************************/
 extern void setup()
 {
-	//pinMode(D6, OUTPUT);
-	Serial2.begin(9600, 6);
-	Serial6.begin(12345, 1);
+	//Serial2.begin(9600, 6);
+	//Serial6.begin(12345, 1);
 	//delay(2000);
-	//Serial2.println("ok");
+
 	Serial6.println("OK");
-	intMidiClock.setBPM(100);
-	// Write our function address into the hw timer
-	//timer3TickCallback = &MidiClock::hwTimerCallback;
-	timer3TickCallback = hwTimerCallback;
-	//Go to fresh state
-	mainPanel.reset();
 	
-	//clockSocket.SetBeatCallback(statusPanel.BeatCallback);
+	// Write our function address into the hw timer
+	timer3TickCallback = hwTimerCallback;
+	
+	// Configure Clocks and Sockets
+	intMidiClock.setBPM(100);
+	clockSocket.SetBeatCallback(sketchBeatCallback);
 	clockSocket.SetTickCallback(sketchTickCallback);
 	clockSocket.SwitchMidiClock(&extMidiClock);
 
+	// Go to fresh state
+	mainPanel.reset();
+
+	// Configure MIDI objects
 	MIDI.setHandleClock(handleClock);
 	MIDI.setHandleStart(handleStart);
 	MIDI.setHandleContinue(handleContinue);
 	MIDI.setHandleStop(handleStop);
-	MIDI.setHandleNoteOn(handleNoteOn);  // Put only the name of the function
+	MIDI.setHandleNoteOn(handleNoteOn);
     MIDI.setHandleNoteOff(handleNoteOff);
     MIDI.begin(MIDI_CHANNEL_OMNI);
+
+	CtrlMIDI.setHandleClock(handleAltClock);
+    CtrlMIDI.begin(MIDI_CHANNEL_OMNI);
 	
 }
 
 extern void loop()
 {
 	MIDI.read();
+	CtrlMIDI.read();
 	if(Serial6.available())
 	{
 		Serial6.println((char)Serial6.read());
@@ -141,33 +189,7 @@ extern void loop()
 		mainPanel.printDebug();
 		//Serial6.println(mainPanel.getState());
 		//Serial6.print("Playing: ");
+		CtrlMIDI.sendRealTime(midi::Clock);
 	}
 	
-}
-
-void sketchTickCallback(MidiClock * caller)
-{
-	//char buffer[5];
-	switch(caller->getState())
-	{
-		case Stopped:
-		{
-			MIDI.sendRealTime(midi::Clock);
-			//sprintf( buffer, "----" );
-			//Segments.displayDrawClockNums(buffer);
-		}
-		break;
-		case OutputOff:
-		{
-			//sprintf( buffer, "    " );
-			//Segments.displayDrawClockNums(buffer);
-		}
-		default:
-		case Paused:
-		case Playing:
-			MIDI.sendRealTime(midi::Clock);
-		break;
-		break;
-	}
-
 }

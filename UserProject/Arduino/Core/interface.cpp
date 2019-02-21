@@ -6,9 +6,11 @@
 #include "interface.h"
 
 /* Private variables ---------------------------------------------------------*/
+extern UartInstance_t PA9_10_UART;
 extern UartInstance_t VCP_UART;
 extern UartInstance_t D01_UART;
 
+HardwareSerial Serial1;
 HardwareSerial Serial2;
 HardwareSerial Serial6;
 
@@ -19,6 +21,7 @@ void interface_init(void)
 {
 	Serial2.init(&D01_UART);
 	Serial6.init(&VCP_UART);
+	Serial1.init(&PA9_10_UART);
 }
 
 void delay(uint32_t delayInput)
