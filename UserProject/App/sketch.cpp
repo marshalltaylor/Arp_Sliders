@@ -1,25 +1,17 @@
 #include "Arduino.h"
 #include "SlidersPanel.h"
 #include "sketch.h"
-#include <MIDI.h>
 #include "adc_ext.h"
 
-#include "midiTime.h"
 #include "timerModule32.h"
 
-
-MidiClock extMidiClock;
-MidiClock intMidiClock;
-MidiClockSocket clockSocket;
-
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, MIDI);
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, CtrlMIDI);
+#include "globals.h"
 
 SlidersPanel mainPanel;
 
 uint16_t debugCounter = 0;
 
-TimerClass32 debugTimer( 1000000 ); //1 second
+TimerClass32 debugTimer( 3000000 );
 TimerClass32 mainPanelTimer( 10000 );
 //TimerClass32 statusPanelTimer( 400 );
 
@@ -40,7 +32,7 @@ void handleClock( void )
 
 void handleStart( void )
 {
-	extMidiClock.setTickCount(0);
+	extMidiClock.setTickCount(-1);
 	extMidiClock.setState(Playing);
 }
 
@@ -58,13 +50,17 @@ void handleStop( void )
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
 	//digitalWrite(D6, 0);
-	Serial6.print("pitch: ");
-	Serial6.println(pitch);
+	//Serial6.print("pitch: ");
+	//Serial6.println(pitch);
+	//controlNoteMixer.input( 0x09, channel, pitch, velocity );
+	outputNoteMixer.keyboardInput( 0x09, channel, pitch, velocity );
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
 	//digitalWrite(D6, 1);
+	//controlNoteMixer.input( 0x08, channel, pitch, velocity );
+	outputNoteMixer.keyboardInput( 0x08, channel, pitch, velocity );
 }
 
 /***** Control MIDI Callbacks *************************************************/
@@ -97,6 +93,7 @@ void sketchTickCallback(MidiClock * caller)
 			MIDI.sendRealTime(midi::Clock);
 			//sprintf( buffer, "----" );
 			//Segments.displayDrawClockNums(buffer);
+			outputPlayer.updateTicks(caller->ticks);
 		}
 		break;
 		case OutputOff:
@@ -107,7 +104,10 @@ void sketchTickCallback(MidiClock * caller)
 		default:
 		case Paused:
 		case Playing:
+			//Serial6.print("ticks = ");
+			//Serial6.println(caller->ticks);
 			MIDI.sendRealTime(midi::Clock);
+			outputPlayer.updateTicks(caller->ticks);
 		break;
 		break;
 	}
@@ -131,6 +131,11 @@ extern void setup()
 	clockSocket.SetBeatCallback(sketchBeatCallback);
 	clockSocket.SetTickCallback(sketchTickCallback);
 	clockSocket.SwitchMidiClock(&extMidiClock);
+	
+	extMidiClock.setState(Stopped);
+	
+	// Test config loop
+	outputPlayer.setLoop(&loops[0]);
 
 	// Go to fresh state
 	mainPanel.reset();
@@ -143,9 +148,11 @@ extern void setup()
 	MIDI.setHandleNoteOn(handleNoteOn);
     MIDI.setHandleNoteOff(handleNoteOff);
     MIDI.begin(MIDI_CHANNEL_OMNI);
-
+	MIDI.turnThruOff();
+	
 	CtrlMIDI.setHandleClock(handleAltClock);
     CtrlMIDI.begin(MIDI_CHANNEL_OMNI);
+	CtrlMIDI.turnThruOff();
 	
 }
 
@@ -187,8 +194,7 @@ extern void loop()
 		sprintf(buffer, "__DEBUG__\nFreeStack() = %d\n", FreeStack());
 		Serial6.print(buffer);
 		mainPanel.printDebug();
-		//Serial6.println(mainPanel.getState());
-		//Serial6.print("Playing: ");
+		extMidiClock.printDebug();
 		CtrlMIDI.sendRealTime(midi::Clock);
 	}
 	

@@ -46,7 +46,7 @@ void MidiClock::incrementTick(void)
 	processCallbacks();
 }
 
-void MidiClock::setTickCount( uint32_t input )
+void MidiClock::setTickCount( int32_t input )
 {
 	ticks = input;
 }
@@ -97,6 +97,17 @@ void MidiClock::processCallbacks( void )
 			BeatCallback(this);
 		}
 	}
+}
+
+void MidiClock::printDebug( void )
+{
+	
+	char buffer[200] = {0};
+	sprintf(buffer, "MidiClock debug: state\n");
+	Serial6.print(buffer);
+	sprintf(buffer, "                  %d\n", getState());
+	Serial6.print(buffer);
+
 }
 
 MidiClockSocket::MidiClockSocket(void)

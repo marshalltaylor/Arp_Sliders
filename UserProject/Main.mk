@@ -46,8 +46,14 @@ PROJECT_C_SOURCES = \
 ./App/App.cpp \
 ./App/sketch.cpp \
 ./App/midiTime.cpp \
-./App/SlidersPanel.cpp
-
+./App/SlidersPanel.cpp \
+./App/MicroLL.cpp \
+./App/midiDB.cpp \
+./App/sourceNoteMixer.cpp \
+./App/outputNoteMixer.cpp \
+./App/midiLoops.cpp \
+./App/loopPlayer.cpp \
+./App/globals.cpp
 
 PROJECT_C_INCLUDES = \
 ./Core/Inc \

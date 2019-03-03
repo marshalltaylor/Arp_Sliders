@@ -18,7 +18,7 @@ public:
 	void incrementTime_uS(int);
 	void service(void);
 	void setBPM(int);
-	void setTickCount( uint32_t );
+	void setTickCount( int32_t );
 	void setState( PlayState_t );
 	PlayState_t getState(void);
 
@@ -26,13 +26,15 @@ public:
 	uint32_t ticksToQuarterNotes( uint32_t inputTicks );
 	uint32_t ticksToMeasures( uint32_t inputTicks );
 
-	uint32_t ticks;
+	int32_t ticks;
 	
 	void processCallbacks( void );	
 	//Callbacks are outputs of MidiClock 
 	//Set to NULL when not in use, otherwise MidiClock calls these periodically
 	void (*BeatCallback)(MidiClock *) = NULL;
 	void (*TickCallback)(MidiClock *) = NULL;
+	
+	void printDebug(void);
 
 private:
 	PlayState_t playState;
