@@ -41,8 +41,7 @@ private:
 struct PatternData
 {
 	// Note information
-	uint8_t pattern[40];
-	uint8_t noteInList[128];
+	int8_t pattern[40];
 	uint8_t rootNote;
 	// Time information
 	uint8_t patternLen;

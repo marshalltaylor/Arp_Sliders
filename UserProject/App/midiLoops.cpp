@@ -115,13 +115,14 @@ void PatternContainer::resetStep( void )
 	step = 0;
 }
 
-void PatternContainer::incStep( void )
+int16_t PatternContainer::incStep( void )
 {
 	step++;
 	if( step >= length )
 	{
 		step = 0;
 	}
+	return loopData.pattern[step];
 }
 
 int16_t PatternContainer::getNote( void )
