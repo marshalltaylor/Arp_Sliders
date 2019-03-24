@@ -2,18 +2,17 @@
 #include "SlidersPanel.h"
 #include "sketch.h"
 #include "adc_ext.h"
-
 #include "timerModule32.h"
-
 #include "globals.h"
+
 
 SlidersPanel mainPanel;
 
 uint16_t debugCounter = 0;
 
 TimerClass32 debugTimer( 3000000 );
-TimerClass32 mainPanelTimer( 10000 );
-//TimerClass32 statusPanelTimer( 400 );
+TimerClass32 mainPanelTimer( 1000 );
+TimerClass32 lcdFrameTimer( 100000 );
 
 #if defined(__arm__)
 extern "C" char* sbrk(int incr);
@@ -22,6 +21,7 @@ static int FreeStack() {
   return &top - reinterpret_cast<char*>(sbrk(0));
 }
 #endif
+
 
 /***** Main MIDI Callbacks ****************************************************/
 void handleClock( void )
@@ -45,7 +45,6 @@ void handleStop( void )
 {
 	extMidiClock.setState(Stopped);
 }
-
 	
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
@@ -61,6 +60,24 @@ void handleNoteOff(byte channel, byte pitch, byte velocity)
 	//digitalWrite(D6, 1);
 	//controlNoteMixer.input( 0x08, channel, pitch, velocity );
 	outputNoteMixer.keyboardInput( 0x08, channel, pitch, velocity );
+}
+
+void handleCtrlNoteOn(byte channel, byte pitch, byte velocity)
+{
+	if((pitch < 48)||(pitch > 72))
+	{
+		return;
+	}
+	mainPanel.inputCtrlNote(pitch - 48);
+}
+
+void handleCtrlNoteOff(byte channel, byte pitch, byte velocity)
+{
+	//if((pitch < 48)||(pitch > 72))
+	//{
+	//	return;
+	//}
+	//pattern.curPattern()->ctrlNotes[pitch - 48] = false;
 }
 
 /***** Control MIDI Callbacks *************************************************/
@@ -151,6 +168,8 @@ extern void setup()
 	MIDI.turnThruOff();
 	
 	CtrlMIDI.setHandleClock(handleAltClock);
+	CtrlMIDI.setHandleNoteOn(handleCtrlNoteOn);
+    CtrlMIDI.setHandleNoteOff(handleCtrlNoteOff);
     CtrlMIDI.begin(MIDI_CHANNEL_OMNI);
 	CtrlMIDI.turnThruOff();
 	
@@ -168,6 +187,7 @@ extern void loop()
 	{
 		mainPanelTimer.update(usTicks);
 		debugTimer.update(usTicks);
+		lcdFrameTimer.update(usTicks);
 		//statusPanelTimer.update(usTicks);
 		//Done?  Lock it back up
 		usTicksLocked = 1;
@@ -178,6 +198,16 @@ extern void loop()
 		convertADC();
 		mainPanel.tickStateMachine(10);
 	}
+
+	if(lcdFrameTimer.flagStatus() == PENDING)
+	{
+		//oled.clear(PAGE);
+		oled.clearStaffData();
+		oled.drawStaff();
+		oled.outputData();
+		oled.display();  // Display what's in the buffer (splashscreen)
+	}
+
 
 //	if(statusPanelTimer.flagStatus() == PENDING)
 //	{

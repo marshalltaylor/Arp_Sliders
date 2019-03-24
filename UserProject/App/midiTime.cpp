@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "display_clock.h"
 #include "midiTime.h"
 #include "interface.h"
 

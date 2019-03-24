@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TEENSYVIEW_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <Arduino.h>
 
 #define swap(a, b) { uint8_t t = a; a = b; b = t; }
@@ -122,6 +123,7 @@ public:
 	TeensyView(uint8_t rst, uint8_t dc, uint8_t cs, uint8_t sck, uint8_t mosi);
 	
 	void begin(void);
+	void end(void);
 	void setClockRate( uint32_t );
 	virtual size_t write(uint8_t);
 
@@ -134,7 +136,7 @@ public:
 	// LCD Draw functions
 	void clear(uint8_t mode);
 	void clear(uint8_t mode, uint8_t c);
-	void invert(boolean inv);
+	void invert(bool inv);
 	void contrast(uint8_t contrast);
 	void display(void);
 	void display(uint8_t);
@@ -179,8 +181,8 @@ public:
 	void scrollVertRight(uint8_t start, uint8_t stop);
 	void scrollVertLeft(uint8_t start, uint8_t stop);
 	void scrollStop(void);
-	void flipVertical(boolean flip);
-	void flipHorizontal(boolean flip);
+	void flipVertical(bool flip);
+	void flipHorizontal(bool flip);
 	
 private:
 	uint8_t csPin, dcPin, rstPin, sckPin, mosiPin;
@@ -193,8 +195,5 @@ private:
 	static const unsigned char *fontsPointer[];
 	uint32_t clockRateSetting;
 	
-	// Communication (Defined in hardware.cpp)
-	void spiTransfer(byte data);
-	void spiSetup();
 };
 #endif

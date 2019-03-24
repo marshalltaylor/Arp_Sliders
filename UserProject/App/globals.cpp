@@ -13,3 +13,6 @@ Loop loops[10];
 LoopPlayer outputPlayer;
 OutputNoteMixer outputNoteMixer;
 
+OLEDFunctions oled(0,0,0,0,0);
+
+PatternContainer pattern;

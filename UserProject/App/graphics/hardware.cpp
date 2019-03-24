@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 
 #include "TeensyView.h"
-#include <SPI.h>
+#include "spi.h"
 
 /** \brief Set Up SPI Interface
 
@@ -44,16 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 void TeensyView::spiSetup()
 {
-	// Initialize the pins:
-	pinMode(csPin, OUTPUT);	// CS is an OUTPUT
-	digitalWrite(csPin, HIGH);	// Start CS High
-	
-	//Do alt pin assignment
-	SPI.setMOSI(mosiPin);
-	SPI.setSCK(sckPin);
-	
-	SPI.begin();
-	
 	
 }
 
@@ -62,12 +52,9 @@ void TeensyView::spiSetup()
 	Use the SPI library to transfer a byte. Only used for data OUTPUT.
 	This function does not toggle the CS pin. Do that before and after!
 **/
-void TeensyView::spiTransfer(byte data)
+void TeensyView::spiTransfer(uint8_t data)
 {
-	SPI.beginTransaction(SPISettings(clockRateSetting, MSBFIRST, SPI_MODE0));
-    digitalWrite(csPin, LOW);
-	SPI.transfer(data);	
-    digitalWrite(csPin, HIGH);
-    SPI.endTransaction();
+	HAL_SPI_Transmit_IT(&hspi1, data, 1);
+	//It may not be so simple
 }
 

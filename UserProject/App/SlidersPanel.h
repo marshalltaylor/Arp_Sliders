@@ -17,6 +17,15 @@ enum PStates
 	PRunning
 };
 
+enum MCStates
+{
+	MCInit,
+	MCWait,
+	MCIdle,
+	MCRecording,
+	MCClear
+};
+
 class SlidersPanel : public Panel
 {
 public:
@@ -26,7 +35,7 @@ public:
 	void switchToInternalClock( void );
 	void switchToExternalClock( void );
 	void printDebug( void );
-	
+	void inputCtrlNote( uint8_t );
 private:
 	//Internal Panel Components
 	Button sw1Up;
@@ -56,6 +65,7 @@ private:
 	
 	//State machine stuff  
 	PStates state;
+	MCStates recState;
 private:
 	
 	char knobTempoStr[3];

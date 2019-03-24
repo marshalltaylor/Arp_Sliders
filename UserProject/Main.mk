@@ -6,7 +6,7 @@ Core/Src/gpio.c \
 Core/Src/adc.c \
 Core/Src/adc_ext.c \
 Core/Src/debugPins.c \
-Core/Src/display_clock.c \
+Core/Src/spiDisplay.c \
 Core/Src/dma.c \
 Core/Src/spi.c \
 Core/Src/tim.c \
@@ -53,8 +53,12 @@ PROJECT_C_SOURCES = \
 ./App/outputNoteMixer.cpp \
 ./App/midiLoops.cpp \
 ./App/loopPlayer.cpp \
-./App/globals.cpp
+./App/globals.cpp \
+./App/graphics/TeensyView.cpp \
+./App/graphics/musicView.cpp
+
 
 PROJECT_C_INCLUDES = \
 ./Core/Inc \
+./App/graphics \
 ./App

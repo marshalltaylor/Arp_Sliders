@@ -9,6 +9,8 @@
 #include "outputNoteMixer.h"
 #include "midiLoops.h"
 #include "loopPlayer.h"
+#include <TeensyView.h>  // Include the SFE_TeensyView library
+#include "musicView.h"
 
 extern midi::MidiInterface<HardwareSerial> MIDI;
 extern midi::MidiInterface<HardwareSerial> CtrlMIDI;
@@ -22,5 +24,9 @@ extern SourceNoteMixer controlNoteMixer;
 extern Loop loops[10];
 extern LoopPlayer outputPlayer;
 extern OutputNoteMixer outputNoteMixer;
+
+extern OLEDFunctions oled;
+
+extern PatternContainer pattern;
 
 #endif // GLOBALS_H_INCLUDED

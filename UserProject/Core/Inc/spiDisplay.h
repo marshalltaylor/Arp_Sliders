@@ -5,8 +5,11 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-	void writeDisplay(uint8_t *);
-	void displayTransmitFrame(void);
+void spiDisplayWriteData(uint8_t data);
+void spiDisplayWriteCommand(uint8_t data);
+void spiDisplayDisable(void);
+void spiDisplayEnable(void);
+
 #ifdef __cplusplus
  }
 #endif
