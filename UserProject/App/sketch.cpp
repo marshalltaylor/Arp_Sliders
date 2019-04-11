@@ -110,7 +110,7 @@ void sketchTickCallback(MidiClock * caller)
 			MIDI.sendRealTime(midi::Clock);
 			//sprintf( buffer, "----" );
 			//Segments.displayDrawClockNums(buffer);
-			outputPlayer.updateTicks(caller->ticks);
+			//outputPlayer.updateTicks(caller->ticks);
 		}
 		break;
 		case OutputOff:
@@ -124,7 +124,7 @@ void sketchTickCallback(MidiClock * caller)
 			//Serial6.print("ticks = ");
 			//Serial6.println(caller->ticks);
 			MIDI.sendRealTime(midi::Clock);
-			outputPlayer.updateTicks(caller->ticks);
+			//outputPlayer.updateTicks(caller->ticks);
 		break;
 		break;
 	}
@@ -152,7 +152,7 @@ extern void setup()
 	extMidiClock.setState(Stopped);
 	
 	// Test config loop
-	outputPlayer.setLoop(&loops[0]);
+	//outputPlayer.setLoop(&loops[0]);
 
 	// Go to fresh state
 	mainPanel.reset();

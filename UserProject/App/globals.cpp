@@ -9,10 +9,10 @@ MidiClockSocket clockSocket;
 
 //Note objects
 SourceNoteMixer controlNoteMixer;
-Loop loops[10];
-LoopPlayer outputPlayer;
+//Loop loops[10];
+//LoopPlayer outputPlayer;
 OutputNoteMixer outputNoteMixer;
 
 OLEDFunctions oled(0,0,0,0,0);
 
-PatternContainer pattern;
+//PatternContainer pattern;

@@ -124,10 +124,10 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 	{
 		//LoopGenTest myGen;
 		//myGen.generate( &loops[0], 4, 1 );
-		pattern.setRoot(48);
-		pattern.printControls();
-		pattern.generatePattern();
-		pattern.printPattern();
+		//pattern.setRoot(48);
+		//pattern.printControls();
+		//pattern.generatePattern();
+		//pattern.printPattern();
 		oled.clear(PAGE);
 		oled.setFontType(0);  // Set font to type 0
 		oled.setCursor(0, 0);
@@ -139,32 +139,32 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 	}
 	if( sw3Up.serviceRisingEdge() )
 	{
-		outputPlayer.setDrone(1);
+		//outputPlayer.setDrone(1);
 	}
 	if( sw3Up.serviceFallingEdge() )
 	{
-		outputPlayer.setDrone(0);
+		//outputPlayer.setDrone(0);
 	}
 	if( sw4Up.serviceRisingEdge() ||
 		sw4Up.serviceFallingEdge() ||
 		sw4Down.serviceRisingEdge() ||
 		sw4Down.serviceFallingEdge() )
 	{
-		if( sw4Up.getState() )
-		{
-			// Switch is up
-			pattern.setDirection(1);
-		}
-		else if( sw4Down.getState() )
-		{
-			// Switch is down
-			pattern.setDirection(-1);
-		}
-		else
-		{
-			// Switch is neutral
-			pattern.setDirection(0);
-		}
+//		if( sw4Up.getState() )
+//		{
+//			// Switch is up
+//			pattern.setDirection(1);
+//		}
+//		else if( sw4Down.getState() )
+//		{
+//			// Switch is down
+//			pattern.setDirection(-1);
+//		}
+//		else
+//		{
+//			// Switch is neutral
+//			pattern.setDirection(0);
+//		}
 	}
 	if( sw5Down.serviceRisingEdge() )
 	{
@@ -179,26 +179,26 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 		oled.end();
 	}
 	
-	if( slider1.serviceChanged() )
-	{
-		pattern.setDepth(slider1.getState() / 16);
-	}
-	if( slider2.serviceChanged() )
-	{
-		pattern.setOverclock(slider2.getState() / 2);
-	}
-	if( slider3.serviceChanged() )
-	{
-		pattern.setPatternLength(slider3.getAsInt16());
-	}
-	if( slider4.serviceChanged() )
-	{
-		pattern.setNoteLength(slider4.getState() / 32);
-	}
-	if( slider5.serviceChanged() )
-	{
-		pattern.setSubDivision(slider5.getState() / 256);
-	}
+//	if( slider1.serviceChanged() )
+//	{
+//		pattern.setDepth(slider1.getState() / 16);
+//	}
+//	if( slider2.serviceChanged() )
+//	{
+//		pattern.setOverclock(slider2.getState() / 2);
+//	}
+//	if( slider3.serviceChanged() )
+//	{
+//		pattern.setPatternLength(slider3.getAsInt16());
+//	}
+//	if( slider4.serviceChanged() )
+//	{
+//		pattern.setNoteLength(slider4.getState() / 32);
+//	}
+//	if( slider5.serviceChanged() )
+//	{
+//		pattern.setSubDivision(slider5.getState() / 256);
+//	}
 	if( slider6.serviceChanged() )
 	{
 	}
@@ -207,8 +207,8 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 		default:
 		case MCClear:
 		{
-			pattern.clearCtrlNotes();
-			pattern.printPattern();
+//			pattern.clearCtrlNotes();
+//			pattern.printPattern();
 			recState = MCWait;
 			break;
 		}
@@ -265,8 +265,8 @@ void SlidersPanel::inputCtrlNote( uint8_t input )
 		{
 			return;
 		}
-		pattern.saveCtrlNote(input);
-		pattern.printPattern();
+//		pattern.saveCtrlNote(input);
+//		pattern.printPattern();
 	}
 }
 
@@ -280,5 +280,5 @@ void SlidersPanel::printDebug( void )
 	Serial6.print(buffer);
 	sprintf(buffer, "              down:   %d      %d      %d      %d      %d\n", sw1Down.getState(), sw2Down.getState(), sw3Down.getState(), sw4Down.getState(), sw5Down.getState());
 	Serial6.print(buffer);
-	outputPlayer.printDebug();
+	//outputPlayer.printDebug();
 }

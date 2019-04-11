@@ -46,19 +46,27 @@ PROJECT_C_SOURCES = \
 ./App/App.cpp \
 ./App/sketch.cpp \
 ./App/midiTime.cpp \
-./App/SlidersPanel.cpp \
 ./App/MicroLL.cpp \
-./App/midiDB.cpp \
+./App/SlidersPanel.cpp \
 ./App/sourceNoteMixer.cpp \
 ./App/outputNoteMixer.cpp \
-./App/midiLoops.cpp \
-./App/loopPlayer.cpp \
 ./App/globals.cpp \
 ./App/graphics/TeensyView.cpp \
-./App/graphics/musicView.cpp
+./App/graphics/musicView.cpp \
+./App/MidiUtils/MidiUtils.cpp \
+./App/SequencePlayer/SequencePlayer.cpp \
+./App/Sequences/SequenceCommon.cpp
 
 
 PROJECT_C_INCLUDES = \
 ./Core/Inc \
 ./App/graphics \
+./App/MidiUtils \
+./App/SequencePlayer \
+./App/Sequences \
 ./App
+
+# old files
+#./App/midiDB.cpp \
+#./App/midiLoops.cpp \
+#./App/loopPlayer.cpp \

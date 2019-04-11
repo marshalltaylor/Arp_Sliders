@@ -103,7 +103,8 @@ void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t
 				lowNote = keyboardInputNoteOnList.readObject(i)->value;
 			}
 		}
-		outputPlayer.setRoot(lowNote);
+		// set the root
+		//outputPlayer.setRoot(lowNote);
 	}
 
 }

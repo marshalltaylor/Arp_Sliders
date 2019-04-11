@@ -14,18 +14,19 @@
 #define LOOPPLAYER_H_INCLUDED
 #include "midiLoops.h"
 
+
 class LoopPlayer
 {
 public:
 	LoopPlayer(void);
-	void setLoop( Loop * input );
+//	void setLoop( Loop * input );
 	void updateTicks( uint32_t ticks );
 	void setRoot( int16_t );
 	void setDrone( bool value );
 	
 	void printDebug( void );
 private:
-	Loop * loaded;
+//	Loop * loaded;
 	uint16_t playHeadTicks;
 	uint16_t tickOfNextEvent;
 	

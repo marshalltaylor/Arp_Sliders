@@ -21,93 +21,155 @@
 
 //**********************************************************************//
 //
+//  Register
+//
+
+PatternRegister::PatternRegister( void )
+{
+	for( int i = 0; i < 10; i++ )
+	{
+		subscribers[i] = NULL;
+	}
+	numSubscribed = 0;
+}
+
+void PatternRegister::load( PatternData * input )
+{
+	memcpy(&data, input, sizeof(data));
+}
+
+void PatternRegister::clear( void )
+{
+	memset(&data, 0, sizeof(data));
+}
+
+PatternData * PatternRegister::subscribe( void (*newSub)(void) )
+{
+	if( numSubscribed < 10 )
+	{
+		for( int i = 0; i < numSubscribed; i++ )
+		{
+			if( subscribers[numSubscribed] == newSub )
+			{
+				return &data;
+			}
+		}
+		//Not found in list
+		subscribers[numSubscribed] = newSub;
+		numSubscribed++;
+		return &data;
+	}
+	return NULL;
+}
+
+bool PatternRegister::unsubscribe( void (*newSub)(void) )
+{
+	for( int i = 0; i < numSubscribed; i++ )
+	{
+		if( subscribers[numSubscribed] == newSub )
+		{
+			if( i != numSubscribed )
+			{
+				//don't do this if we're removing the most recent subscribers
+				subscribers[i] = subscribers[numSubscribed];
+			}
+			subscribers[numSubscribed] = NULL;
+			numSubscribed--;
+			return true;
+		}
+	}
+	return false;
+}
+
+//**********************************************************************//
+//
 //
 //
 //
 //
 //
 
-Loop::Loop( void )
-{
-	
-}
-
-MicroLL * Loop::getLoopPtr( void )
-{
-	return &loopData;
-}
+//Loop::Loop( void )
+//{
+//	
+//}
+//
+//MicroLL * Loop::getLoopPtr( void )
+//{
+//	return &loopData;
+//}
 	
 //void Loop::clear( void )
 //{
 //	loopData.clear();
 //}
 
-LoopGenTest::LoopGenTest( void )
-{
-	
-}
-
-void LoopGenTest::generate( Loop * loop, float lengthInBeats, uint8_t subdivision )
-{
-	MicroLL * noteList = loop->getLoopPtr();
-	noteList->clear();
-	listObject_t tempLO;
-	tempLO.channel = 1;
-	
-	uint16_t writeTick = 0;
-	uint16_t totalPatternTicks = lengthInBeats * 24;
-	loop->length = totalPatternTicks;
-	uint16_t noteLengthTicks = (24 / (subdivision + 1));
-	uint16_t noteOnTicks = noteLengthTicks / 2;
-	uint16_t noteOffTicks = noteLengthTicks - noteOnTicks;
-	while(writeTick < totalPatternTicks)
-	{
-		//Write a simple pattern
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x09;
-		tempLO.value = 48;
-		tempLO.data = 100;
-		noteList->pushObject(tempLO);
-		writeTick += noteOnTicks;
-
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x08;
-		tempLO.data = 0;
-		noteList->pushObject(tempLO);
-		writeTick += noteOffTicks;
-
-
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x09;
-		tempLO.value = 60;
-		tempLO.data = 100;
-		noteList->pushObject(tempLO);
-		writeTick += noteOnTicks;
-
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x08;
-		tempLO.data = 0;
-		noteList->pushObject(tempLO);
-		writeTick += noteOffTicks;
-
-		
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x09;
-		tempLO.value = 72;
-		tempLO.data = 100;
-		noteList->pushObject(tempLO);
-		writeTick += noteOnTicks;
-
-		tempLO.timeStamp = writeTick;
-		tempLO.eventType = 0x08;
-		tempLO.data = 0;
-		noteList->pushObject(tempLO);
-		writeTick += noteOffTicks;
-	}
-	
-	noteList->printfMicroLL();
-	
-}
+//LoopGenTest::LoopGenTest( void )
+//{
+//	
+//}
+//
+//void LoopGenTest::generate( Loop * loop, float lengthInBeats, uint8_t subdivision )
+//{
+//	MicroLL * noteList = loop->getLoopPtr();
+//	noteList->clear();
+//	listObject_t tempLO;
+//	tempLO.channel = 1;
+//	
+//	uint16_t writeTick = 0;
+//	uint16_t totalPatternTicks = lengthInBeats * 24;
+//	loop->length = totalPatternTicks;
+//	uint16_t noteLengthTicks = (24 / (subdivision + 1));
+//	uint16_t noteOnTicks = noteLengthTicks / 2;
+//	uint16_t noteOffTicks = noteLengthTicks - noteOnTicks;
+//	while(writeTick < totalPatternTicks)
+//	{
+//		//Write a simple pattern
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x09;
+//		tempLO.value = 48;
+//		tempLO.data = 100;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOnTicks;
+//
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x08;
+//		tempLO.data = 0;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOffTicks;
+//
+//
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x09;
+//		tempLO.value = 60;
+//		tempLO.data = 100;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOnTicks;
+//
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x08;
+//		tempLO.data = 0;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOffTicks;
+//
+//		
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x09;
+//		tempLO.value = 72;
+//		tempLO.data = 100;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOnTicks;
+//
+//		tempLO.timeStamp = writeTick;
+//		tempLO.eventType = 0x08;
+//		tempLO.data = 0;
+//		noteList->pushObject(tempLO);
+//		writeTick += noteOffTicks;
+//	}
+//	
+//	noteList->printfMicroLL();
+//	
+//}
 
 
 	// Operational

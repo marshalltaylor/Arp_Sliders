@@ -7,8 +7,6 @@
 #include "midiTime.h"
 #include "sourceNoteMixer.h"
 #include "outputNoteMixer.h"
-#include "midiLoops.h"
-#include "loopPlayer.h"
 #include <TeensyView.h>  // Include the SFE_TeensyView library
 #include "musicView.h"
 
@@ -21,12 +19,12 @@ extern MidiClockSocket clockSocket;
 
 //Note objects
 extern SourceNoteMixer controlNoteMixer;
-extern Loop loops[10];
-extern LoopPlayer outputPlayer;
+//extern Loop loops[10];
+//extern LoopPlayer outputPlayer;
 extern OutputNoteMixer outputNoteMixer;
 
 extern OLEDFunctions oled;
 
-extern PatternContainer pattern;
+//extern PatternContainer pattern;
 
 #endif // GLOBALS_H_INCLUDED

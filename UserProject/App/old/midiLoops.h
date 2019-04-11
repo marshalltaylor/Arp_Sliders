@@ -16,54 +16,12 @@
 #include "stdint.h"
 #include "MicroLL.h"
 
-//class PatternRegister
-//{
-//public:
-//    PatternRegister( void ){};
-//	void load( PatternData * );
-//	void clear( void );
-//	PatternData * subscribe( void (*newSub)(void) );
-//	bool unsubscribe( void (*newSub)(void) );
-//
-//private:
-//	PatternData data;
-//	// Example fn ptr:  void (*foo)(int);
-//	void (*subscribers[10])(void);
-//	uint8_t numSubscribed = 0;
-//	
-//};
-
-
-
-class Loop
-{
-public:
-    Loop( void );
-	MicroLL * getLoopPtr( void );
-	//void clear( void );
-	int16_t length;
-private:
-	int8_t ticksPerEvent;
-	MicroLL loopData;
-};
-
-class LoopGenTest
-{
-public:
-    LoopGenTest( void );
-	void generate( Loop * output, float lengthInBeats, uint8_t subdivision );
-private:
-};
-
-// Pattern based attempt
 //Note data type
 struct PatternElement
 {
-  uint8_t value;
-  uint8_t velocity;
-  bool gated;
-  
-
+  unsigned value: 8;
+  uint8_t velocity: 8;
+  bool gated: 1;
 };
 
 struct PatternData
@@ -83,6 +41,45 @@ struct PatternData
 	bool quantize;
 	bool syncDownbeat;
 };
+
+class PatternRegister
+{
+public:
+    PatternRegister( void );
+	void load( PatternData * );
+	void clear( void );
+	PatternData * subscribe( void (*newSub)(void) );
+	bool unsubscribe( void (*newSub)(void) );
+
+private:
+	PatternData data;
+	// Example fn ptr:  void (*foo)(int);
+	void (*subscribers[10])(void);
+	uint8_t numSubscribed = 0;
+	
+};
+
+
+
+//class Loop
+//{
+//public:
+//    Loop( void );
+//	MicroLL * getLoopPtr( void );
+//	//void clear( void );
+//	int16_t length;
+//private:
+//	int8_t ticksPerEvent;
+//	MicroLL loopData;
+//};
+//
+//class LoopGenTest
+//{
+//public:
+//    LoopGenTest( void );
+//	void generate( Loop * output, float lengthInBeats, uint8_t subdivision );
+//private:
+//};
 
 
 class PatternContainer
