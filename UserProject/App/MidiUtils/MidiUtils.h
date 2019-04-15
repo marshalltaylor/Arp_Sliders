@@ -12,17 +12,15 @@
 //**********************************************************************//
 #ifndef MIDIUTILS_H_INCLUDED
 #define MIDIUTILS_H_INCLUDED
-//#include "SequencePlayer.h"
-//#include "midiTime.h"
-#include "SequenceCommon.h"
+#include <stdint.h>
 
 // -----------------------------------------------------------------------------
 // Type definitions
 
-typedef byte StatusByte;
-typedef byte DataByte;
-typedef byte Channel;
-typedef byte FilterMode;
+typedef uint8_t StatusByte;
+typedef uint8_t DataByte;
+typedef uint8_t Channel;
+typedef uint8_t FilterMode;
 
 // -----------------------------------------------------------------------------
 
@@ -164,28 +162,25 @@ struct mmqObject_t : public MidiMessage
 };
 
 //Depth into the stack type
-typedef uint16_t mmqItemNumber_t;
+typedef int16_t mmqItemNumber_t;
 
 class MidiMessageQueue
 {
-    mmqItemNumber_t maxLength;
-    mmqItemNumber_t currentPosition;
-
-  public:
+public:
     //A pointer to the next object, list items enumerate from this
     mmqObject_t * startObjectPtr;
 	
 	//A empty note to point to when the list is empty
     mmqObject_t nullObject;
 
-  public:
     MidiMessageQueue( mmqItemNumber_t ); //Construct with passed max depth
     MidiMessageQueue( void );
 
     //Item manipulation
-    void pushObject( mmqObject_t & ); //Pass mmqObject_t
+    void pushObject( mmqObject_t * ); //Pass mmqObject_t *
+	void pushObject( MidiMessage * );
     void dropObject( mmqItemNumber_t ); //Pass position, returns mmqObject_t
-	void insertObject( mmqObject_t &, mmqItemNumber_t ); //Pass mmqObject_t and position
+	void insertObject( mmqObject_t *, mmqItemNumber_t ); //Pass mmqObject_t and position
 
 	void clear( void );
 
@@ -196,8 +191,28 @@ class MidiMessageQueue
 	
 	//Debug
 	void printfMicroLL( void );
+	
+protected:
+    mmqItemNumber_t maxLength;
+    mmqItemNumber_t currentPosition;
+	
+private:
 
 };
 
-#endif // LOOPPLAYER_H_INCLUDED
+class MidiMessageLinkedList : public MidiMessageQueue
+{
+public:
+	MidiMessageLinkedList(void){};
+    MidiMessageLinkedList(mmqItemNumber_t cdata): MidiMessageQueue(cdata){};
+	//void insertObjectByTime( listObject_t & ); //Pass listObject_t
+	//listIdemNumber_t seekNextAfter( uint32_t );//Search by tick value
+	//int8_t seekObjectbyTimeStamp( listObject_t & ); //pass listObject_t, returns position
+	//int8_t seekObjectbyTimeStamp( uint16_t ); //pass time, returns position
+	mmqItemNumber_t seekObjectByNoteValue( mmqObject_t * ); //pass mmqObject_t, returns position
+	mmqItemNumber_t seekObjectByNoteValue( MidiMessage * data );
+private:
+};
+
+#endif
 

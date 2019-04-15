@@ -12,40 +12,37 @@
 //**********************************************************************//
 #ifndef SEQUENCEPLAYER_H_INCLUDED
 #define SEQUENCEPLAYER_H_INCLUDED
-#include "SequencePlayer.h"
-#include "midiTime.h"
 #include "MidiUtils.h"
+#include "SequenceCommon.h"
 
 // Write this player to match common sequence interfaces
-// Clean up SequenceCommon!  Lots of dead code.
-// 
 
 class SequencePlayer
 {
 public:
 	SequencePlayer(void);
 	void attachMainRegister( SequenceRegister * targetRegister );
-	void mainRegisterChanged( void );
 
 	// These methods access a queue for output
 	uint16_t available( void );
-	void read( listIdemNumber_t * );
+	void read( MidiMessage * );
 
 	// Cause the player to queue new output events, if needed
+	// ticks are midi ticks... is this how I want it?
 	void updateTicks( uint32_t ticks );
 	
 	void printDebug( void );
 
 private:
-	bool detachMainRegister( void );
+	//don't think i need this
+	//bool detachMainRegister( void );
 	uint16_t playHeadTicks;
 
 	MidiMessageQueue outputQueue;
-	MidiMessageQueue outputNoteOn;
+	MidiMessageLinkedList outputNotesOn;
 	
 	SequenceRegister * mainRegister;
 
 };
 
-#endif // LOOPPLAYER_H_INCLUDED
-
+#endif

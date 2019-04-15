@@ -14,18 +14,18 @@
 #define SOURCENOTEMIXER_H_INCLUDED
 
 #include "stdint.h"
-#include "MicroLL.h"
+#include "MidiUtils.h"
 
 class SourceNoteMixer
 {
 public:
     SourceNoteMixer( void );
-	void input( uint8_t eventType, uint8_t channel, uint8_t pitch, uint8_t velocity );
+	void input( MidiMessage * data );
 private:
 	void flushOutputList( void );
 public: // For debug printer
-	MicroLL inputNoteOnList;
-	MicroLL outputNoteBuffer;
+	MidiMessageLinkedList inputNoteOnList;
+	MidiMessageLinkedList outputNoteBuffer;
 
 };
 

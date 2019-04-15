@@ -13,7 +13,7 @@
 #ifndef SEQUENCECOMMON_H_INCLUDED
 #define SEQUENCECOMMON_H_INCLUDED
 
-#include "stdint.h"
+#include <stdint.h>
 
 //Note data type
 struct PatternElement
@@ -45,7 +45,7 @@ struct Sequence
 // Used to make a list of users for a register
 struct SequenceRegisterUser
 {
-	void * subscriber;
+	void * reference;
 	bool changed;
 };
 
@@ -58,13 +58,16 @@ public:
     SequenceRegister( void );
 	void load( Sequence * );
 	void clear( void );
-	Sequence * addUser( void * parentObject );
+	SequenceRegister * addUser( void * parentObject );
 	bool removeUser( void * parentObject );
 
 	// This is the key to keeping in sync.  The users ask the register
 	//  if the data has changed since they last asked.  This function
 	//  clear's the new data flag for calling user.
 	bool serviceChanged( void * parentObject );
+	// get the current pointer.
+	Sequence * getSequence( void );
+	
 	
 private:
 	Sequence data;
@@ -73,39 +76,5 @@ private:
 	uint8_t numberOfUsers = 0;
 	
 };
-
-//class PatternContainer
-//{
-//public:
-//    PatternContainer( void ){};
-//	// Operational
-//	void resetStep( void );
-//	int16_t incStep( void );
-//	int16_t getNote( void );
-//	void setRoot( int16_t input );
-//	void clearCtrlNotes( void );
-//	void saveCtrlNote( uint8_t input );
-//	Sequence * curPattern( void );
-//	// Generational
-//	void constrain( int16_t * input, int16_t lower, int16_t upper );
-//	void setDepth( int16_t input );
-//	void setOverclock( int16_t input );
-//	void setPatternLength( int16_t input );
-//	void setNoteLength( int16_t input );
-//	void setSubDivision( int16_t input );
-//	void setDirection( int16_t input );
-//	void setQuantize( bool input );
-//	void setSyncDownbeat( bool input );
-//	void generatePattern( void );
-//	void printPattern( void );
-//	void printControls( void );
-//	void generateGraphic( void );
-//
-//private:
-//	int16_t nextStepToPlay;
-//	Sequence data;
-//	bool freeRunning = false;
-//};
-
 
 #endif // MIDILOOPS_H_INCLUDED

@@ -14,7 +14,7 @@
 
 //Includes
 #include "stdint.h"
-#include "MicroLL.h"
+#include "MidiUtils.h"
 #include "outputNoteMixer.h"
 #include "Arduino.h"
 
@@ -34,27 +34,22 @@ OutputNoteMixer::OutputNoteMixer( void )
 	
 }
 
-void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t pitch, uint8_t velocity )
+void OutputNoteMixer::keyboardInput( MidiMessage * data )
 {
-	MidiEvent tempEvent;
 	// if( channel == ...     // Filter out channels
-	tempEvent.eventType = eventType;
-	tempEvent.channel = channel;
-	tempEvent.value = pitch;
-	tempEvent.data = velocity;
 	
-	switch( eventType )
+	switch( data->controlMask & 0xF0 ) //Upper nibble only -- SYSEX will fail here
 	{
-		case 0x09: // Note on
+		case NoteOn: // Note on
 		{
 			//Search for the note.  If found, do nothing, else write
-			if( keyboardInputNoteOnList.seekObjectbyNoteValue( tempEvent ) == -1 )
+			if( keyboardInputNoteOnList.seekObjectByNoteValue( data ) == -1 )
 			{
 				//note not found.
 				//Mark key now on
-				keyboardInputNoteOnList.pushObject( tempEvent );
+				keyboardInputNoteOnList.pushObject( data );
 				//Put to tx buffer for through
-				//outputNoteBuffer.pushObject( tempEvent );
+				//outputNoteBuffer.pushObject( data );
 				//flushOutputList();
 			}
 			else
@@ -66,11 +61,11 @@ void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t
 			break;
 		}
 		break;
-		case 0x08: // Note off
+		case NoteOff: // Note off
 		{
 			//Search for the note.
 			int16_t tempSeekDepth;
-			tempSeekDepth = keyboardInputNoteOnList.seekObjectbyNoteValue( tempEvent );
+			tempSeekDepth = keyboardInputNoteOnList.seekObjectByNoteValue( data );
 			if( tempSeekDepth == -1 )
 			{
 				//not found.
@@ -83,7 +78,7 @@ void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t
 				//Remove from key list
 				keyboardInputNoteOnList.dropObject( tempSeekDepth );
 				//Put to tx buffer
-				//outputNoteBuffer.pushObject( tempEvent );
+				//outputNoteBuffer.pushObject( data );
 				//flushOutputList();
 			}
 		}
@@ -92,7 +87,7 @@ void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t
 		break;
 	}
 	//Find lowest note in keyboard (if any)
-	listIdemNumber_t keyListLength = keyboardInputNoteOnList.listLength();
+	mmqItemNumber_t keyListLength = keyboardInputNoteOnList.listLength();
 	if( keyListLength != 0 )
 	{
 		int16_t lowNote = 127;
@@ -109,20 +104,20 @@ void OutputNoteMixer::keyboardInput( uint8_t eventType, uint8_t channel, uint8_t
 
 }
 
-void OutputNoteMixer::playerInput( listObject_t * obj )
+void OutputNoteMixer::playerInput( MidiMessage * data )
 {
-	switch( obj->eventType )
+	switch( data->controlMask & 0xF0 )
 	{
-		case 0x09: // Note on
+		case NoteOn: // Note on
 		{
 			//Search for the note.  If found, do nothing, else write
-			if( playerInputNoteOnList.seekObjectbyNoteValue( *obj ) == -1 )
+			if( playerInputNoteOnList.seekObjectByNoteValue( data ) == -1 )
 			{
 				//note not found.
 				//Mark key now on
-				playerInputNoteOnList.pushObject( *obj );
+				playerInputNoteOnList.pushObject( data );
 				//Put to tx buffer for through
-				outputNoteBuffer.pushObject( *obj );
+				outputNoteBuffer.pushObject( data );
 				flushOutputList();
 			}
 			else
@@ -134,11 +129,11 @@ void OutputNoteMixer::playerInput( listObject_t * obj )
 			break;
 		}
 		break;
-		case 0x08: // Note off
+		case NoteOff: // Note off
 		{
 			//Search for the note.
 			int16_t tempSeekDepth;
-			tempSeekDepth = playerInputNoteOnList.seekObjectbyNoteValue( *obj );
+			tempSeekDepth = playerInputNoteOnList.seekObjectByNoteValue( data );
 			if( tempSeekDepth == -1 )
 			{
 				//not found.
@@ -151,7 +146,7 @@ void OutputNoteMixer::playerInput( listObject_t * obj )
 				//Remove from key list
 				playerInputNoteOnList.dropObject( tempSeekDepth );
 				//Put to tx buffer
-				outputNoteBuffer.pushObject( *obj );
+				outputNoteBuffer.pushObject( data );
 				flushOutputList();
 			}
 		}
@@ -164,23 +159,23 @@ void OutputNoteMixer::playerInput( listObject_t * obj )
 
 void OutputNoteMixer::flushOutputList( void )
 {
-	listIdemNumber_t len = outputNoteBuffer.listLength();
+	mmqItemNumber_t len = outputNoteBuffer.listLength();
 	while( len > 0 )
 	{
-		listObject_t * nextOutput = outputNoteBuffer.readObject( len - 1 );
+		mmqObject_t * nextOutput = outputNoteBuffer.readObject( len - 1 );
 		
 		char buffer[200] = {0};
-		sprintf(buffer, "OM: Len = %d, Chan = %d, note = %d, %s\n", len, nextOutput->channel, nextOutput->value, (nextOutput->eventType == 0x09)?"NoteOn":"NoteOff");
+		sprintf(buffer, "OM: Len=%d, Mask=0x%d, Chan=%d, note=%d, 0x%X\n", len, nextOutput->controlMask, nextOutput->channel, nextOutput->value, nextOutput->data);
 		Serial6.print(buffer);
 		
-		switch( nextOutput->eventType )
+		switch( nextOutput->controlMask )
 		{
-			case 0x09: //note on
+			case NoteOn: //note on
 			{
 				MIDI.sendNoteOn(nextOutput->value, nextOutput->data, nextOutput->channel);
 			}
 			break;
-			case 0x08: //note off
+			case NoteOff: //note off
 			{
 				MIDI.sendNoteOff(nextOutput->value, nextOutput->data, nextOutput->channel);
 			}

@@ -45,8 +45,6 @@ $(CUBE_PROJECT_DIR)/Drivers/STM32F4xx_HAL_Driver/Inc \
 PROJECT_C_SOURCES = \
 ./App/App.cpp \
 ./App/sketch.cpp \
-./App/midiTime.cpp \
-./App/MicroLL.cpp \
 ./App/SlidersPanel.cpp \
 ./App/sourceNoteMixer.cpp \
 ./App/outputNoteMixer.cpp \
@@ -54,6 +52,7 @@ PROJECT_C_SOURCES = \
 ./App/graphics/TeensyView.cpp \
 ./App/graphics/musicView.cpp \
 ./App/MidiUtils/MidiUtils.cpp \
+./App/MidiUtils/midiTime.cpp \
 ./App/SequencePlayer/SequencePlayer.cpp \
 ./App/Sequences/SequenceCommon.cpp
 
@@ -65,8 +64,3 @@ PROJECT_C_INCLUDES = \
 ./App/SequencePlayer \
 ./App/Sequences \
 ./App
-
-# old files
-#./App/midiDB.cpp \
-#./App/midiLoops.cpp \
-#./App/loopPlayer.cpp \

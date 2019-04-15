@@ -1,11 +1,10 @@
 #include "Arduino.h"
-//#include "outputNoteMixer.h"
-#include "globals.h"
+#include "MidiUtils.h"
 #include "SequencePlayer.h"
 
-//extern OutputNoteMixer outputNoteMixer;
+#define Serial Serial6
 
-SequencePlayer::SequencePlayer(void) : outputQueue(200), outputNoteOn(127)
+SequencePlayer::SequencePlayer(void) : outputQueue(200), outputNotesOn(127)
 {
 	playHeadTicks = 0;
 	mainRegister = NULL;
@@ -16,26 +15,10 @@ void SequencePlayer::attachMainRegister( SequenceRegister * targetRegister )
 	// Remove old association
 	if( mainRegister )
 	{
-		mainRegister->unsubscribe(mainRegisterChanged, this);
+		mainRegister->removeUser(this);
 	}
 	// Subscribe to new register
-	targetRegister->subscribe(mainRegisterChanged, this);
-	// Indicate change locally once
-	mainRegisterChanged();
-}
-
-soid SequencePlayer::mainRegisterChanged( void )
-{
-	while( outputNoteOn.listLength() )
-	{
-		listIdemNumber_t * object = outputNoteOn.readObject(0);
-		// Convert to note off
-		object->controlMask = NoteOff;
-		// Give to output queue
-		outputQueue.pushObject(object);
-		// Drop from list
-		outputNoteOn.dropObject(0);
-	}
+	mainRegister = targetRegister->addUser(this);
 }
 
 uint16_t SequencePlayer::available( void )
@@ -43,80 +26,106 @@ uint16_t SequencePlayer::available( void )
 	return outputQueue.listLength();
 }
 
-void SequencePlayer::read( listIdemNumber_t * outputObject )
+void SequencePlayer::read( MidiMessage * outputObject )
 {
 	if(!available())
 	{
 		return;
 	}
-	copyObject( outputObject, 0 );
+	mmqObject_t * nextObject = outputQueue.readObject( 0 );
+	outputObject->controlMask = nextObject->controlMask;
+	outputObject->channel = nextObject->channel;
+	outputObject->value = nextObject->value;
+	outputObject->data = nextObject->data;
 }
 
+// not sure if input is ticks from loop start or delta ticks
 void SequencePlayer::updateTicks( uint32_t ticks )
 {
-//	if( loaded == NULL )
-//	{
-//		return;
-//	}
-//	//Get a reference to the loop's linked list
-//	MicroLL * loopLL = loaded->getLoopPtr();
-//	uint16_t ticksModLength = ticks % loaded->length;
-//	
-//	listObject_t * itemReference;
-//	listObject_t modifiedObject;
-//	
-//	listIdemNumber_t itemLocation = loopLL->seekObjectbyTimeStamp(ticksModLength);
-//	if(( itemLocation != -1 ) && root != -1 )
-//	{
-//		// play tick
-//		itemReference = loopLL->readObject( itemLocation );
-//		modifiedObject.timeStamp = itemReference->timeStamp;
-//		modifiedObject.eventType = itemReference->eventType;
-//		modifiedObject.channel = itemReference->channel;
-//		modifiedObject.data = itemReference->data;
-//		switch( itemReference->eventType )
-//		{
-//			case 0x09: //note on
-//			{
-//				if( rootHasChanged )
-//				{
-//					// It's ok, no notes on
-//					rootHasChanged = false;
-//				}
-//				modifiedObject.value = ((int16_t)root + (int16_t)itemReference->value - 48);
-//				if(( clockSocket.getSocketedClock()->getState() == Playing ) &&
-//						(drone || outputNoteMixer.keyboardInputNoteOnList.listLength()) )
-//				{
-//					outputNoteMixer.playerInput(&modifiedObject);
-//				}
-//			}
-//			break;
-//			case 0x08: //note off
-//			{
-//				if( rootHasChanged )
-//				{
-//					// Use the old root
-//					rootHasChanged = false;
-//					modifiedObject.value = ((int16_t)oldRoot + (int16_t)itemReference->value - 48);
-//				}
-//				else
-//				modifiedObject.value = ((int16_t)root + (int16_t)itemReference->value - 48);
-//				outputNoteMixer.playerInput(&modifiedObject);
-//			}
-//			break;
-//			default:
-//			break;
-//		}
-//	}
+	// Leave immediately if no register loaded
+	if( mainRegister == NULL )
+	{
+		return;
+	}
+	
+	// Do things if the pointed to register has changed.
+	if(mainRegister->serviceChanged(this))
+	{
+		//send all the note offs
+		while( outputNotesOn.listLength() )
+		{
+			mmqObject_t * object = outputNotesOn.readObject(0);
+			// Convert to note off
+			object->controlMask = NoteOff;
+			// Give to output queue
+			outputQueue.pushObject(object);
+			// Drop from list
+			outputNotesOn.dropObject(0);
+		}
+	}
+	
+	// This should be smarter.  If a sequence changes, but the note
+	// in progress is the same it shouldn't be restart.
+	
+	//Get reference to sequence for next section
+	
+	Sequence * sequenceData = mainRegister->getSequence();
+
+	//What is this?
+	//uint16_t ticksModLength = ticks % sequenceData->patternLength;
+	
+	
+	/***** This object will only play without transpose *****/
+	// also note length fixed to 1/2 step for now
+	
+	// calculate ticks per half-setp
+	uint8_t ticksPerHalfStep = sequenceData->ticksPerStep / 2;
+	
+	// calculate current step
+	// Index to step, round to earlier
+	uint8_t currentStep = ticks / sequenceData->ticksPerStep;
+	
+	// Figure out what to do
+	if( ticks == currentStep )
+	{
+		//note on
+		mmqObject_t newNoteOn;
+		newNoteOn.channel = 0;
+		newNoteOn.controlMask = NoteOn;
+		// get the pointed to register's sequence data
+		newNoteOn.value = sequenceData->step[currentStep].value;
+		newNoteOn.data = 127;
+		// gated?  other parameters?
+		
+		outputNotesOn.pushObject(&newNoteOn);
+		outputQueue.pushObject(&newNoteOn);
+	}
+	if( ticks == currentStep + ticksPerHalfStep )
+	{
+		//note off
+		
+		mmqObject_t newNoteOff;
+		newNoteOff.channel = 0;
+		newNoteOff.controlMask = NoteOff;
+		// get the pointed to register's sequence data
+		newNoteOff.value = sequenceData->step[currentStep].value;
+		newNoteOff.data = 0;
+		
+		mmqItemNumber_t seekResult = outputNotesOn.seekObjectByNoteValue(&newNoteOff);
+		if( seekResult != -1 )
+		{
+			outputNotesOn.dropObject(seekResult);
+		}
+		// Always send note-off, who knows what harm it will do?
+		outputQueue.pushObject(&newNoteOff);
+	}
 }
 
-void LoopPlayer::printDebug( void )
+void SequencePlayer::printDebug( void )
 {
 	
 	char buffer[200] = {0};
-	sprintf(buffer, "loopPlayer debug: oldRoot, root, drone, rootHasChanged\n");
-	Serial6.print(buffer);
-	sprintf(buffer, "                  %d, %d, %d, %d\n", oldRoot, root, drone, rootHasChanged);
+	sprintf(buffer, "SequencePlayer TODO: Write debug routine\n");
 	Serial6.print(buffer);
 
 }

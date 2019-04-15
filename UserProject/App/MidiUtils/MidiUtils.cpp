@@ -1,6 +1,5 @@
 #include "stdint.h"
 #include "Arduino.h"
-#include "globals.h"
 #include "MidiUtils.h"
 
 #define Serial Serial6
@@ -23,6 +22,7 @@ MidiMessageQueue::MidiMessageQueue( mmqItemNumber_t inputNumber )
   nullObject.nextObject = &nullObject;  //Points to self.
 
 }
+
 MidiMessageQueue::MidiMessageQueue( void )
 {
   startObjectPtr = &nullObject;
@@ -34,7 +34,7 @@ MidiMessageQueue::MidiMessageQueue( void )
 }
 
 //Pass mmqObject_t to be pushed to the stack (top)
-void MidiMessageQueue::pushObject( mmqObject_t & objectToPush )
+void MidiMessageQueue::pushObject( mmqObject_t * objectToPush )
 {
   //This creates a new object, but then forgets the name
   //and doesn't delete the object.
@@ -65,11 +65,54 @@ void MidiMessageQueue::pushObject( mmqObject_t & objectToPush )
 	
 	//****CUSTOM OBJECT TYPE CODE****//
     //Set the new note's params
-    newObject->controlMask = objectToPush.controlMask;
-	newObject->channel = objectToPush.channel;
-    newObject->value = objectToPush.value;
-	newObject->data = objectToPush.data;
-	newObject->tick = objectToPush.tick;
+    newObject->controlMask = objectToPush->controlMask;
+	newObject->channel = objectToPush->channel;
+    newObject->value = objectToPush->value;
+	newObject->data = objectToPush->data;
+	newObject->tick = objectToPush->tick;
+	
+    newObject->nextObject = &nullObject;
+  }
+
+}
+
+//Pass mmqObject_t to be pushed to the stack (top)
+void MidiMessageQueue::pushObject( MidiMessage * objectToPush )
+{
+  //This creates a new object, but then forgets the name
+  //and doesn't delete the object.
+  //
+  //If the stack size is too big, new object won't be accepted
+  if ( currentPosition < maxLength )
+  {
+    //Make a new object to the list
+    mmqObject_t *newObject = new mmqObject_t;
+#ifdef PRINT_DEBUG
+    Serial.print("\nMADE A NEW LIST ITEM\n");
+#endif
+
+    //Point the start to the new note if this is the first one
+	if( currentPosition == 0 )
+	{
+	  startObjectPtr = newObject;
+	}
+	else
+	{
+	  //Otherwise set the previous note to this new address
+	  mmqObject_t * previousObjectPtr = readObject( currentPosition - 1 );
+	  previousObjectPtr->nextObject = newObject;
+	}
+
+    //grow list size
+    currentPosition++;
+	
+	//****CUSTOM OBJECT TYPE CODE****//
+    //Set the new note's params
+    newObject->controlMask = objectToPush->controlMask;
+	newObject->channel = objectToPush->channel;
+    newObject->value = objectToPush->value;
+	newObject->data = objectToPush->data;
+	newObject->tick = 0;
 	
     newObject->nextObject = &nullObject;
   }
@@ -129,7 +172,7 @@ void MidiMessageQueue::dropObject( mmqItemNumber_t positionToDrop )
 }
 
 //Pass mmqObject_t and position
-void MidiMessageQueue::insertObject( mmqObject_t & objectToInsert, mmqItemNumber_t positionToBe )
+void MidiMessageQueue::insertObject( mmqObject_t * objectToInsert, mmqItemNumber_t positionToBe )
 {
 	//pointer for object to drop
 	mmqObject_t * tempObjectPtr;
@@ -154,11 +197,11 @@ void MidiMessageQueue::insertObject( mmqObject_t & objectToInsert, mmqItemNumber
 			startObjectPtr = newObject;
 			
 			//Apply the values
-			newObject->controlMask = objectToInsert.controlMask;
-			newObject->channel = objectToInsert.channel;
-			newObject->value = objectToInsert.value;
-			newObject->data = objectToInsert.data;
-			newObject->tick = objectToInsert.tick;
+			newObject->controlMask = objectToInsert->controlMask;
+			newObject->channel = objectToInsert->channel;
+			newObject->value = objectToInsert->value;
+			newObject->data = objectToInsert->data;
+			newObject->tick = objectToInsert->tick;
 			
 			//grow list size
 			currentPosition++;
@@ -185,11 +228,11 @@ void MidiMessageQueue::insertObject( mmqObject_t & objectToInsert, mmqItemNumber
 			tempObjectPtr->nextObject = newObject;
 			
 			//Apply the values
-			newObject->controlMask = objectToInsert.controlMask;
-			newObject->value = objectToInsert.value;
-			newObject->data = objectToInsert.data;
-			newObject->channel = objectToInsert.channel;
-			newObject->tick = objectToInsert.tick;
+			newObject->controlMask = objectToInsert->controlMask;
+			newObject->value = objectToInsert->value;
+			newObject->data = objectToInsert->data;
+			newObject->channel = objectToInsert->channel;
+			newObject->tick = objectToInsert->tick;
 			
 			//grow list size
 			currentPosition++;
@@ -293,4 +336,49 @@ void MidiMessageQueue::printfMicroLL( void )
   Serial.print("\ncurrentPosition:");
   Serial.println(currentPosition);
 
+}
+
+mmqItemNumber_t MidiMessageLinkedList::seekObjectByNoteValue( mmqObject_t * noteToSeek ) //pass mmqObject_t, returns position
+{
+  //Create temporary note to use for comparison
+  mmqObject_t * tempObject;
+  tempObject = startObjectPtr;
+  mmqItemNumber_t returnVar = -1;
+
+  for (uint8_t i = 0; i < currentPosition; i++)
+  {
+    //****CUSTOM OBJECT TYPE CODE****//
+    //For now, only use the value
+    if ( tempObject->value == noteToSeek->value )
+    {
+      returnVar = i;
+    }
+    //Walk down the list
+    tempObject = tempObject->nextObject;
+  }
+  return returnVar;
+}
+
+
+// I think these types should take uint8_t * value...
+
+mmqItemNumber_t MidiMessageLinkedList::seekObjectByNoteValue( MidiMessage * data )
+{
+  //Create temporary note to use for comparison
+  mmqObject_t * tempObject;
+  tempObject = startObjectPtr;
+  mmqItemNumber_t returnVar = -1;
+
+  for (uint8_t i = 0; i < currentPosition; i++)
+  {
+    //****CUSTOM OBJECT TYPE CODE****//
+    //For now, only use the value
+    if ( tempObject->value == data->value )
+    {
+      returnVar = i;
+    }
+    //Walk down the list
+    tempObject = tempObject->nextObject;
+  }
+  return returnVar;
 }

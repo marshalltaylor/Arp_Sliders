@@ -48,27 +48,41 @@ void handleStop( void )
 	
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
+	MidiMessage newMessage;
+	newMessage.controlMask = NoteOn;
+	newMessage.channel = channel;
+	newMessage.value = pitch;
+	newMessage.data = velocity;
 	//digitalWrite(D6, 0);
-	//Serial6.print("pitch: ");
-	//Serial6.println(pitch);
+	if(1)
+	{
+		char buffer[200] = {0};
+		sprintf(buffer, "MIDILIB: Mask=0x%d, Chan=%d, note=%d, 0x%X\n", newMessage.controlMask, newMessage.channel, newMessage.value, newMessage.data);
+		Serial6.print(buffer);
+	}
 	//controlNoteMixer.input( 0x09, channel, pitch, velocity );
-	outputNoteMixer.keyboardInput( 0x09, channel, pitch, velocity );
+	outputNoteMixer.keyboardInput( &newMessage );
 }
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
+	MidiMessage newMessage;
+	newMessage.controlMask = NoteOff;
+	newMessage.channel = channel;
+	newMessage.value = pitch;
+	newMessage.data = velocity;
 	//digitalWrite(D6, 1);
 	//controlNoteMixer.input( 0x08, channel, pitch, velocity );
-	outputNoteMixer.keyboardInput( 0x08, channel, pitch, velocity );
+	outputNoteMixer.keyboardInput( &newMessage );
 }
 
 void handleCtrlNoteOn(byte channel, byte pitch, byte velocity)
 {
-	if((pitch < 48)||(pitch > 72))
-	{
-		return;
-	}
-	mainPanel.inputCtrlNote(pitch - 48);
+	//if((pitch < 48)||(pitch > 72))
+	//{
+	//	return;
+	//}
+	//mainPanel.inputCtrlNote(pitch - 48);
 }
 
 void handleCtrlNoteOff(byte channel, byte pitch, byte velocity)

@@ -14,20 +14,20 @@
 #define OUTPUTNOTEMIXER_H_INCLUDED
 
 #include "stdint.h"
-#include "MicroLL.h"
+#include "MidiUtils.h"
 
 class OutputNoteMixer
 {
 public:
     OutputNoteMixer( void );
-	void keyboardInput( uint8_t eventType, uint8_t channel, uint8_t pitch, uint8_t velocity );
-	void playerInput( listObject_t * obj );
+	void keyboardInput( MidiMessage * data );
+	void playerInput( MidiMessage * data );
 private:
 	void flushOutputList( void );
 public: // For debug printer
-	MicroLL keyboardInputNoteOnList;
-	MicroLL playerInputNoteOnList;
-	MicroLL outputNoteBuffer;
+	MidiMessageLinkedList keyboardInputNoteOnList;
+	MidiMessageLinkedList playerInputNoteOnList;
+	MidiMessageLinkedList outputNoteBuffer;
 
 };
 

@@ -14,7 +14,7 @@
 
 //Includes
 #include "stdint.h"
-#include "MicroLL.h"
+#include "MidiUtils.h"
 #include "sourceNoteMixer.h"
 #include "Arduino.h"
 
@@ -31,27 +31,22 @@ SourceNoteMixer::SourceNoteMixer( void )
 	
 }
 
-void SourceNoteMixer::input( uint8_t eventType, uint8_t channel, uint8_t pitch, uint8_t velocity )
+void SourceNoteMixer::input( MidiMessage * data )
 {
-	MidiEvent tempEvent;
-	// if( channel == ...     // Filter out channels
-	tempEvent.eventType = eventType;
-	tempEvent.channel = channel;
-	tempEvent.value = pitch;
-	tempEvent.data = velocity;
+	// if( data->channel == ...     // Filter out channels
 	
-	switch( eventType )
+	switch( data->controlMask & 0xF0 ) //Upper nibble only -- SYSEX will fail here
 	{
-		case 0x09: // Note on
+		case NoteOn: // Note on
 		{
 			//Search for the note.  If found, do nothing, else write
-			if( inputNoteOnList.seekObjectbyNoteValue( tempEvent ) == -1 )
+			if( inputNoteOnList.seekObjectByNoteValue( data ) == -1 )
 			{
 				//note not found.
 				//Mark key now on
-				inputNoteOnList.pushObject( tempEvent );
+				inputNoteOnList.pushObject( data );
 				//Put to tx buffer for through
-				outputNoteBuffer.pushObject( tempEvent );
+				outputNoteBuffer.pushObject( data );
 				flushOutputList();
 			}
 			else
@@ -63,11 +58,11 @@ void SourceNoteMixer::input( uint8_t eventType, uint8_t channel, uint8_t pitch, 
 			break;
 		}
 		break;
-		case 0x08: // Note off
+		case NoteOff: // Note off
 		{
 			//Search for the note.
 			int16_t tempSeekDepth;
-			tempSeekDepth = inputNoteOnList.seekObjectbyNoteValue( tempEvent );
+			tempSeekDepth = inputNoteOnList.seekObjectByNoteValue( data );
 			if( tempSeekDepth == -1 )
 			{
 				//not found.
@@ -80,7 +75,7 @@ void SourceNoteMixer::input( uint8_t eventType, uint8_t channel, uint8_t pitch, 
 				//Remove from key list
 				inputNoteOnList.dropObject( tempSeekDepth );
 				//Put to tx buffer
-				outputNoteBuffer.pushObject( tempEvent );
+				outputNoteBuffer.pushObject( data );
 				flushOutputList();
 			}
 		}
@@ -93,13 +88,13 @@ void SourceNoteMixer::input( uint8_t eventType, uint8_t channel, uint8_t pitch, 
 
 void SourceNoteMixer::flushOutputList( void )
 {
-	listIdemNumber_t len = outputNoteBuffer.listLength();
+	mmqItemNumber_t len = outputNoteBuffer.listLength();
 	while( len > 0 )
 	{
-		listObject_t * nextOutput = outputNoteBuffer.readObject( len - 1 );
+		mmqObject_t * nextOutput = outputNoteBuffer.readObject( len - 1 );
 		
 		char buffer[200] = {0};
-		sprintf(buffer, "SM: Len = %d, Chan = %d, note = %d, %s\n", len, nextOutput->channel, nextOutput->value, (nextOutput->eventType == 0x09)?"NoteOn":"NoteOff");
+		sprintf(buffer, "SM: Len=%d, Mask=0x%d, Chan=%d, note=%d, 0x%X\n", len, nextOutput->controlMask, nextOutput->channel, nextOutput->value, nextOutput->data);
 		Serial6.print(buffer);
 		
 		outputNoteBuffer.dropObject( len - 1 );
