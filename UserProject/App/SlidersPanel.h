@@ -35,7 +35,7 @@ public:
 	void switchToInternalClock( void );
 	void switchToExternalClock( void );
 	void printDebug( void );
-	void inputCtrlNote( uint8_t );
+	bool isRecording( void );
 private:
 	//Internal Panel Components
 	Button sw1Up;

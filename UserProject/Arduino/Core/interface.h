@@ -17,5 +17,6 @@ extern uint8_t usTicksLocked;
 
 void interface_init(void);
 void delay(uint32_t delayInput);
+long int shitty_micros(void);
 
 #endif

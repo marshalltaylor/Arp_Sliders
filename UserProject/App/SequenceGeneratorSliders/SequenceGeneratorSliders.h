@@ -20,13 +20,11 @@
 
    ///// NOT INCLUDED IN BUILD
 
-of course this needs to be done, but first,
+of course this needs to be done
 
-remove MicroLL from places like the note mixers and midi handlers.
-Try to use the MidiUtils definitions if possible.
+then attach it to a midi input to start testing.
 
-Then start running syntax checking
-
+After that, write the microview to be able to display any sequence.
 
 class SequenceGeneratorSliders
 {

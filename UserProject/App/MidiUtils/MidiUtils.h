@@ -145,7 +145,7 @@ struct RPN
 
 struct MidiMessage
 {
-  MidiType controlMask;
+  uint8_t controlMask; //Actually MidiType
   uint8_t channel;
   uint8_t value;
   uint16_t data;

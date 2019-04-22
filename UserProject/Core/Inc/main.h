@@ -69,6 +69,7 @@
 
 /* USER CODE BEGIN Private defines */
 int millis(void);
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

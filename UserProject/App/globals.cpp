@@ -10,9 +10,14 @@ MidiClockSocket clockSocket;
 //Note objects
 SourceNoteMixer controlNoteMixer;
 //Loop loops[10];
+
 //LoopPlayer outputPlayer;
 OutputNoteMixer outputNoteMixer;
 
-OLEDFunctions oled(0,0,0,0,0);
+SequenceTeensyView oled(0,0,0,0,0);
 
-//PatternContainer pattern;
+SequenceRegister sReg[REG_LENGTH];
+
+SequencePlayer myPlayer;
+SequenceRecorder myRecorder;
+SequenceDebug sDebug;

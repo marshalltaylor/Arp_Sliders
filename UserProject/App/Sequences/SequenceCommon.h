@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#define MAX_SEQUENCE_STEPS 40
+
+#define MAX_NUMBER_OF_USERS 10
+
 //Note data type
 struct PatternElement
 {
@@ -23,19 +27,33 @@ struct PatternElement
   bool gated: 1;
 };
 
+enum LoopingControl_t
+{
+	LOOPING_DISABLED = 0,
+	LOOPING_AUTO,
+	LOOPING_MANUAL
+};
+
 //Sequence data
 struct Sequence
 {
 	// Note information
-	PatternElement step[40];
-	bool ctrlNotes[25];
+	PatternElement step[MAX_SEQUENCE_STEPS];
+	uint8_t stepsUsed;
+	//bool ctrlNotes[25];
+	//uint8_t ctrlNotesUsed;
 	uint8_t rootNote;
 	// Time information
 	uint8_t ticksPerStep;
+	uint16_t tapeLengthInTicks;
+	// Looping behavior
+	uint8_t loopSequenceAtStep;
+	LoopingControl_t loopingControl;
+	
+	//Unused or unknown
 	int16_t depth; //In notes
 	int16_t overclock;
-	int16_t patternLength;
-	int16_t noteLength;
+	//int8_t noteLength;
 	int16_t subDivision;
 	int16_t direction;
 	bool quantize;
@@ -49,7 +67,6 @@ struct SequenceRegisterUser
 	bool changed;
 };
 
-#define MAX_NUMBER_OF_USERS 10
 
 // Register object with memory storage
 class SequenceRegister

@@ -8,23 +8,40 @@
 #include "sourceNoteMixer.h"
 #include "outputNoteMixer.h"
 #include <TeensyView.h>  // Include the SFE_TeensyView library
-#include "musicView.h"
+#include "SequenceTeensyView.h"
+#include "SequencePlayer.h"
+#include "SequenceRecorder.h"
+#include "SequenceDebug.h"
 
+//LCD
+extern SequenceTeensyView oled;
+
+//MIDI hw interfaces
 extern midi::MidiInterface<HardwareSerial> MIDI;
 extern midi::MidiInterface<HardwareSerial> CtrlMIDI;
 
+//MIDI clocks
 extern MidiClock extMidiClock;
 extern MidiClock intMidiClock;
 extern MidiClockSocket clockSocket;
 
-//Note objects
+//Mixers
 extern SourceNoteMixer controlNoteMixer;
-//extern Loop loops[10];
-//extern LoopPlayer outputPlayer;
 extern OutputNoteMixer outputNoteMixer;
 
-extern OLEDFunctions oled;
+//Sequence
+enum
+{
+	REG_ARP = 0,
+	REG_BASS,
+	REG_DRUMS,
+	REG_LENGTH
+};
 
-//extern PatternContainer pattern;
+extern SequenceRegister sReg[];
+
+extern SequencePlayer myPlayer;
+extern SequenceRecorder myRecorder;
+extern SequenceDebug sDebug;
 
 #endif // GLOBALS_H_INCLUDED

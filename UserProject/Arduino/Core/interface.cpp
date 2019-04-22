@@ -36,3 +36,8 @@ void delay(uint32_t delayInput)
 		//nop
 	}
 }
+
+long int shitty_micros(void)
+{
+	return usTicks;
+}

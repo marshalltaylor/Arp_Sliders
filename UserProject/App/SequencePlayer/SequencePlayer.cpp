@@ -4,6 +4,7 @@
 
 #define Serial Serial6
 
+//This calls member constructors
 SequencePlayer::SequencePlayer(void) : outputQueue(200), outputNotesOn(127)
 {
 	playHeadTicks = 0;
@@ -33,10 +34,13 @@ void SequencePlayer::read( MidiMessage * outputObject )
 		return;
 	}
 	mmqObject_t * nextObject = outputQueue.readObject( 0 );
+	
 	outputObject->controlMask = nextObject->controlMask;
 	outputObject->channel = nextObject->channel;
 	outputObject->value = nextObject->value;
 	outputObject->data = nextObject->data;
+	
+	outputQueue.dropObject(0);
 }
 
 // not sure if input is ticks from loop start or delta ticks
@@ -47,7 +51,7 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 	{
 		return;
 	}
-	
+
 	// Do things if the pointed to register has changed.
 	if(mainRegister->serviceChanged(this))
 	{
@@ -63,18 +67,19 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 			outputNotesOn.dropObject(0);
 		}
 	}
-	
-	// This should be smarter.  If a sequence changes, but the note
-	// in progress is the same it shouldn't be restart.
-	
+
 	//Get reference to sequence for next section
 	
 	Sequence * sequenceData = mainRegister->getSequence();
 
-	//What is this?
-	//uint16_t ticksModLength = ticks % sequenceData->patternLength;
+	// Roll ticks
+	ticks = ticks % sequenceData->tapeLengthInTicks;
+
 	
+	// This should be smarter.  If a sequence changes, but the note
+	// in progress is the same it shouldn't be restart.
 	
+
 	/***** This object will only play without transpose *****/
 	// also note length fixed to 1/2 step for now
 	
@@ -83,10 +88,10 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 	
 	// calculate current step
 	// Index to step, round to earlier
-	uint8_t currentStep = ticks / sequenceData->ticksPerStep;
+	uint32_t currentStep = ticks / sequenceData->ticksPerStep;
 	
 	// Figure out what to do
-	if( ticks == currentStep )
+	if( ticks == currentStep * (uint32_t)sequenceData->ticksPerStep )
 	{
 		//note on
 		mmqObject_t newNoteOn;
@@ -100,7 +105,7 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 		outputNotesOn.pushObject(&newNoteOn);
 		outputQueue.pushObject(&newNoteOn);
 	}
-	if( ticks == currentStep + ticksPerHalfStep )
+	if( ticks == (currentStep * (uint32_t)sequenceData->ticksPerStep) + ticksPerHalfStep )
 	{
 		//note off
 		

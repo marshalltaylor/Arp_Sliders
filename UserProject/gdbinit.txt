@@ -9,3 +9,4 @@ load
 #break main.cpp:23
 #break stm32f4xx_hal_uart.c:1198
 #break SegmentVideo.cpp:39
+break musicView.cpp:40

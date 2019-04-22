@@ -49,32 +49,32 @@ SlidersPanel::SlidersPanel( void )
 	add( &slider3 );
 	slider3.setLowerKnobVal(10);
 	slider3.setUpperKnobVal(1014);
-	slider3.setLowerIntVal(24);
-	slider3.setUpperIntVal(768);
-	slider3.setSamplesAveraged(10);
+	slider4.setLowerIntVal(0);
+	slider4.setUpperIntVal(5);
+	slider4.setSamplesAveraged(10);
 
 	slider4.setHardware(new ArduinoAnalogIn( A3 ));
 	add( &slider4 );
-	slider4.setLowerKnobVal(250);
+	slider4.setLowerKnobVal(10);
 	slider4.setUpperKnobVal(1014);
 	slider4.setLowerIntVal(0);
-	slider4.setUpperIntVal(100);
+	slider4.setUpperIntVal(5);
 	slider4.setSamplesAveraged(10);
 
 	slider5.setHardware(new ArduinoAnalogIn( A4 ));
 	add( &slider5 );
 	slider5.setLowerKnobVal(10);
 	slider5.setUpperKnobVal(1014);
-	slider5.setLowerIntVal(0);
-	slider5.setUpperIntVal(255);
+	slider5.setLowerIntVal(1);
+	slider5.setUpperIntVal(40);
 	slider5.setSamplesAveraged(10);
 
 	slider6.setHardware(new ArduinoAnalogIn( A5 ));
 	add( &slider6 );
 	slider6.setLowerKnobVal(10);
 	slider6.setUpperKnobVal(1014);
-	slider6.setLowerIntVal(40);
-	slider6.setUpperIntVal(208);
+	slider6.setLowerIntVal(4);
+	slider6.setUpperIntVal(32);
 	slider6.setSamplesAveraged(10);
 
 	reset();
@@ -100,108 +100,17 @@ void SlidersPanel::reset( void )
 void SlidersPanel::tickStateMachine( int msTicksDelta )
 {
 	freshenComponents( msTicksDelta );
-	if( sw2Up.serviceRisingEdge() )
+	
+	// Level set
+	//if( sw1Up.serviceRisingEdge() )
+	//{
+	//	
+	//}
+	if( sw1Down.serviceRisingEdge() )
 	{
-		char buffer[200] = {0};
-		sprintf(buffer, "controlNoteMixer inputNoteOnList\n");
-		Serial6.print(buffer);
-		controlNoteMixer.inputNoteOnList.printfMicroLL();
-		sprintf(buffer, "controlNoteMixer outputNoteBuffer\n");
-		Serial6.print(buffer);
-		controlNoteMixer.outputNoteBuffer.printfMicroLL();
-		sprintf(buffer, "outputNoteMixer keyboardInputNoteOnList\n");
-		Serial6.print(buffer);
-		outputNoteMixer.keyboardInputNoteOnList.printfMicroLL();
-		sprintf(buffer, "outputNoteMixer playerInputNoteOnList\n");
-		Serial6.print(buffer);
-		outputNoteMixer.playerInputNoteOnList.printfMicroLL();
-		sprintf(buffer, "outputNoteMixer outputNoteBuffer\n");
-		Serial6.print(buffer);
-		outputNoteMixer.outputNoteBuffer.printfMicroLL();
+		myRecorder.clearAndInit();
 	}
 	
-	if( sw3Down.serviceRisingEdge() )
-	{
-		//LoopGenTest myGen;
-		//myGen.generate( &loops[0], 4, 1 );
-		//pattern.setRoot(48);
-		//pattern.printControls();
-		//pattern.generatePattern();
-		//pattern.printPattern();
-		oled.clear(PAGE);
-		oled.setFontType(0);  // Set font to type 0
-		oled.setCursor(0, 0);
-		oled.print("Hello!");		
-		oled.drawHeart(1 * 18, 12);
-		oled.drawStaff();
-		oled.display();  // Display what's in the buffer (splashscreen)
-
-	}
-	if( sw3Up.serviceRisingEdge() )
-	{
-		//outputPlayer.setDrone(1);
-	}
-	if( sw3Up.serviceFallingEdge() )
-	{
-		//outputPlayer.setDrone(0);
-	}
-	if( sw4Up.serviceRisingEdge() ||
-		sw4Up.serviceFallingEdge() ||
-		sw4Down.serviceRisingEdge() ||
-		sw4Down.serviceFallingEdge() )
-	{
-//		if( sw4Up.getState() )
-//		{
-//			// Switch is up
-//			pattern.setDirection(1);
-//		}
-//		else if( sw4Down.getState() )
-//		{
-//			// Switch is down
-//			pattern.setDirection(-1);
-//		}
-//		else
-//		{
-//			// Switch is neutral
-//			pattern.setDirection(0);
-//		}
-	}
-	if( sw5Down.serviceRisingEdge() )
-	{
-		oled.begin();    // Initialize the OLED
-		oled.flipVertical(true);
-		oled.flipHorizontal(true);
-		oled.clear(ALL); // Clear the display's internal memory
-		oled.display();  // Display what's in the buffer (splashscreen)
-	}
-	if( sw5Down.serviceFallingEdge() )
-	{
-		oled.end();
-	}
-	
-//	if( slider1.serviceChanged() )
-//	{
-//		pattern.setDepth(slider1.getState() / 16);
-//	}
-//	if( slider2.serviceChanged() )
-//	{
-//		pattern.setOverclock(slider2.getState() / 2);
-//	}
-//	if( slider3.serviceChanged() )
-//	{
-//		pattern.setPatternLength(slider3.getAsInt16());
-//	}
-//	if( slider4.serviceChanged() )
-//	{
-//		pattern.setNoteLength(slider4.getState() / 32);
-//	}
-//	if( slider5.serviceChanged() )
-//	{
-//		pattern.setSubDivision(slider5.getState() / 256);
-//	}
-	if( slider6.serviceChanged() )
-	{
-	}
 	switch(recState)
 	{
 		default:
@@ -241,6 +150,121 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 			break;
 		}
 	}
+	if( sw2Up.serviceRisingEdge() )
+	{
+		char buffer[200] = {0};
+		sprintf(buffer, "controlNoteMixer inputNoteOnList\n");
+		Serial6.print(buffer);
+		controlNoteMixer.inputNoteOnList.printfMicroLL();
+		sprintf(buffer, "controlNoteMixer outputNoteBuffer\n");
+		Serial6.print(buffer);
+		controlNoteMixer.outputNoteBuffer.printfMicroLL();
+		sprintf(buffer, "outputNoteMixer keyboardInputNoteOnList\n");
+		Serial6.print(buffer);
+		outputNoteMixer.keyboardInputNoteOnList.printfMicroLL();
+		sprintf(buffer, "outputNoteMixer playerInputNoteOnList\n");
+		Serial6.print(buffer);
+		outputNoteMixer.playerInputNoteOnList.printfMicroLL();
+		sprintf(buffer, "outputNoteMixer outputNoteBuffer\n");
+		Serial6.print(buffer);
+		outputNoteMixer.outputNoteBuffer.printfMicroLL();
+	}
+	
+	if( sw3Down.serviceRisingEdge() )
+	{
+
+	}
+	if( sw3Up.serviceRisingEdge() )
+	{
+		//outputPlayer.setDrone(1);
+	}
+	if( sw3Up.serviceFallingEdge() )
+	{
+		//outputPlayer.setDrone(0);
+	}
+	if( sw4Up.serviceRisingEdge() ||
+		sw4Up.serviceFallingEdge() ||
+		sw4Down.serviceRisingEdge() ||
+		sw4Down.serviceFallingEdge() )
+	{
+//		if( sw4Up.getState() )
+//		{
+//			// Switch is up
+//			pattern.setDirection(1);
+//		}
+//		else if( sw4Down.getState() )
+//		{
+//			// Switch is down
+//			pattern.setDirection(-1);
+//		}
+//		else
+//		{
+//			// Switch is neutral
+//			pattern.setDirection(0);
+//		}
+	}
+	if( sw5Up.serviceRisingEdge() )
+	{
+		myRecorder.setLoopingControl(LOOPING_MANUAL);
+	}
+	if( sw5Up.serviceFallingEdge() )
+	{
+		myRecorder.setLoopingControl(LOOPING_DISABLED);
+	}
+	if( sw5Down.serviceRisingEdge() )
+	{
+		myRecorder.setLoopingControl(LOOPING_AUTO);
+		oled.end();
+		delay(1);
+		//for( volatile uint16_t i = 0; i < 0xFFFE; i++ )
+		//{
+		//	i++;
+		//	i--;
+		//};
+		oled.begin();    // Initialize the OLED
+		oled.flipVertical(true);
+		oled.flipHorizontal(true);
+		oled.clear(ALL); // Clear the display's internal memory
+		oled.display();  // Display what's in the buffer (splashscreen)
+	}
+	if( sw5Down.serviceFallingEdge() )
+	{
+		oled.clear(PAGE);
+		oled.setFontType(0);  // Set font to type 0
+		oled.setCursor(0, 0);
+		oled.print("Hello!");		
+		oled.drawHeart(1 * 18, 12);
+		oled.drawStaff();
+		oled.display();  // Display what's in the buffer (splashscreen)
+		
+		//Debug Recorder
+		myRecorder.printDebug();
+	}
+	
+//	if( slider1.serviceChanged() )
+//	{
+//		pattern.setDepth(slider1.getState() / 16);
+//	}
+//	if( slider2.serviceChanged() )
+//	{
+//		pattern.setOverclock(slider2.getState() / 2);
+//	}
+	if( slider3.serviceChanged() )
+	{
+	}
+	if( slider4.serviceChanged() )
+	{
+		myRecorder.setStepLength( 3 * (1 << slider4.getAsInt16()) ); //lowest is 32nd note
+	}
+	if( slider5.serviceChanged() )
+	{
+		myRecorder.setLoopAtStep( slider5.getAsInt16() );
+	}
+	if( slider6.serviceChanged() )
+	{
+		myRecorder.setTapeLengthInBeats(slider6.getAsInt16());
+	}
+
 }
 
 void SlidersPanel::switchToInternalClock( void )
@@ -257,17 +281,9 @@ void SlidersPanel::switchToExternalClock( void )
 	clockSocket.SwitchMidiClock(&extMidiClock);
 }
 
-void SlidersPanel::inputCtrlNote( uint8_t input )
+bool SlidersPanel::isRecording( void )
 {
-	if( recState == MCRecording )
-	{
-		if(input > 24)
-		{
-			return;
-		}
-//		pattern.saveCtrlNote(input);
-//		pattern.printPattern();
-	}
+	return (recState == MCRecording);
 }
 
 void SlidersPanel::printDebug( void )

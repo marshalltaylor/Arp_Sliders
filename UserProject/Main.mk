@@ -50,10 +50,12 @@ PROJECT_C_SOURCES = \
 ./App/outputNoteMixer.cpp \
 ./App/globals.cpp \
 ./App/graphics/TeensyView.cpp \
-./App/graphics/musicView.cpp \
 ./App/MidiUtils/MidiUtils.cpp \
 ./App/MidiUtils/midiTime.cpp \
+./App/SequenceTeensyView/SequenceTeensyView.cpp \
 ./App/SequencePlayer/SequencePlayer.cpp \
+./App/SequenceRecorder/SequenceRecorder.cpp \
+./App/SequenceDebug/SequenceDebug.cpp \
 ./App/Sequences/SequenceCommon.cpp
 
 
@@ -62,5 +64,8 @@ PROJECT_C_INCLUDES = \
 ./App/graphics \
 ./App/MidiUtils \
 ./App/SequencePlayer \
+./App/SequenceRecorder \
+./App/SequenceDebug \
+./App/SequenceTeensyView \
 ./App/Sequences \
 ./App
