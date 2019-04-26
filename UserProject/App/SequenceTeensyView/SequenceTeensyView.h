@@ -12,6 +12,19 @@
 #define ROW2 256
 #define ROW3 384
 
+typedef enum DAState_t
+{
+	DASTATE_IDLE,
+	DASTATE_SET_LINE_0,
+	DASTATE_SEND_LINE_0,
+	DASTATE_SET_LINE_1,
+	DASTATE_SEND_LINE_1,
+	DASTATE_SET_LINE_2,
+	DASTATE_SEND_LINE_2,
+	DASTATE_SET_LINE_3,
+	DASTATE_SEND_LINE_3
+} STVState_t;
+
 class SequenceTeensyView : public TeensyView
 {
 public:
@@ -75,7 +88,7 @@ public:
 
 	uint8_t staffData[512];
 	
-	void drawFullScreen( void );
+	bool drawFullScreen( void );
 	
 	void clearStaffData( void );
 	void drawStaffData_bar( uint16_t offset, uint8_t topByte, uint8_t bottomByte );
@@ -83,8 +96,16 @@ public:
 	void drawNotes( float pixelsPerTick );
 	void outputData( void );
 	void setPlayHead( int16_t );
-
+	void enableDirectAccess( void );
+	void disableDirectAccess( void );
+	bool isDirectAccessEnabled( void );
+	void processDirectAccess( void );
+	bool isProcessingFrame( void );
+	
 private:
+	bool processingFrame = false;
+	bool directAccessEnabled = false;
+	DAState_t DAState = DASTATE_IDLE;
 	int16_t lastSOC;
 	int16_t lastChargerState = 0;
 	int16_t playHead;

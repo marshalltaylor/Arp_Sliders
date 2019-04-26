@@ -4,6 +4,9 @@
 #include "globals.h"
 #include "MidiUtils.h"
 
+// STM layer includes -- direct access to DMA
+#include "spiDisplay.h"
+
 void SequenceTeensyView::attachMainRegister( SequenceRegister * targetRegister )
 {
 	// Remove old association
@@ -15,12 +18,32 @@ void SequenceTeensyView::attachMainRegister( SequenceRegister * targetRegister )
 	mainRegister = targetRegister->addUser(this);
 }
 
-void SequenceTeensyView::drawFullScreen( void )
+//If the operation was a success, return true
+bool SequenceTeensyView::drawFullScreen( void )
 {
+	//if( spiDisplayBusy() )
+	//{
+	//	return false;
+	//}
 	clearStaffData();
 	drawStaff();
-	outputData();
-	display();
+	if( isDirectAccessEnabled() )
+	{
+		DAState = DASTATE_SET_LINE_0;
+	};
+	
+	//outputData();
+	//display();
+	
+	//setCursor(0,0);
+	//setPageAddress(0);
+	//setColumnAddress(0);
+	//if( !allowDirectAccess )
+	//{
+	//	return true; //act like all is OK
+	//}
+
+	return true;
 }
 
 void SequenceTeensyView::drawStaffData_bar( uint16_t offset, uint8_t topByte, uint8_t bottomByte )
@@ -232,4 +255,97 @@ void SequenceTeensyView::setPlayHead( int16_t ticks )
 	{
 		playHead -= seq->tapeLengthInTicks;
 	}
+};
+
+void SequenceTeensyView::enableDirectAccess( void )
+{
+	directAccessEnabled = true;
+	DAState = DASTATE_SET_LINE_0;
+};
+
+void SequenceTeensyView::disableDirectAccess( void )
+{
+	directAccessEnabled = false;
+};
+
+bool SequenceTeensyView::isDirectAccessEnabled( void )
+{
+	return directAccessEnabled;
+};
+
+
+void SequenceTeensyView::processDirectAccess( void )
+{
+	if( !directAccessEnabled )
+	{
+		DAState = DASTATE_IDLE;
+		return;
+	}
+	if( spiDisplayBusy() )
+	{
+		return;
+	}
+	switch( DAState )
+	{
+		default:
+		case DASTATE_IDLE:
+		{
+			processingFrame = false;
+			break;
+		}
+		case DASTATE_SET_LINE_0:
+		{
+			processingFrame = true;
+			spiDisplayStartDMACommand(0xb0);
+			DAState = DASTATE_SEND_LINE_0;
+			break;
+		}
+		case DASTATE_SEND_LINE_0:
+		{
+			spiDisplayStartDMAData(staffData, 128);
+			DAState = DASTATE_SET_LINE_1;
+			break;
+		}
+		case DASTATE_SET_LINE_1:
+		{
+			spiDisplayStartDMACommand(0xb1);
+			DAState = DASTATE_SEND_LINE_1;
+			break;
+		}
+		case DASTATE_SEND_LINE_1:
+		{
+			spiDisplayStartDMAData(staffData + 128, 128);
+			DAState = DASTATE_SET_LINE_2;
+			break;
+		}
+		case DASTATE_SET_LINE_2:
+		{
+			spiDisplayStartDMACommand(0xb2);
+			DAState = DASTATE_SEND_LINE_2;
+			break;
+		}
+		case DASTATE_SEND_LINE_2:
+		{
+			spiDisplayStartDMAData(staffData + 256, 128);
+			DAState = DASTATE_SET_LINE_3;
+			break;
+		}
+		case DASTATE_SET_LINE_3:
+		{
+			spiDisplayStartDMACommand(0xb3);
+			DAState = DASTATE_SEND_LINE_3;
+			break;
+		}
+		case DASTATE_SEND_LINE_3:
+		{
+			spiDisplayStartDMAData(staffData + 384, 128);
+			DAState = DASTATE_IDLE;
+			break;
+		}
+	}
+};
+
+bool SequenceTeensyView::isProcessingFrame( void )
+{
+	return processingFrame;
 };

@@ -214,8 +214,10 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 	if( sw5Down.serviceRisingEdge() )
 	{
 		myRecorder.setLoopingControl(LOOPING_AUTO);
+		oled.disableDirectAccess();
+		delay(100); // let dma clear
 		oled.end();
-		delay(1);
+		delay(10);
 		//for( volatile uint16_t i = 0; i < 0xFFFE; i++ )
 		//{
 		//	i++;
@@ -226,16 +228,18 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 		oled.flipHorizontal(true);
 		oled.clear(ALL); // Clear the display's internal memory
 		oled.display();  // Display what's in the buffer (splashscreen)
+		oled.enableDirectAccess();
 	}
 	if( sw5Down.serviceFallingEdge() )
 	{
-		oled.clear(PAGE);
-		oled.setFontType(0);  // Set font to type 0
-		oled.setCursor(0, 0);
-		oled.print("Hello!");		
-		oled.drawHeart(1 * 18, 12);
-		oled.drawStaff();
-		oled.display();  // Display what's in the buffer (splashscreen)
+		//oled.disableDirectAccess();
+		//delay(100); // let dma clear
+		//oled.setFontType(0);  // Set font to type 0
+		//oled.setCursor(0, 0);
+		//oled.print("Hello!");		
+		//oled.drawHeart(1 * 18, 12);
+		//oled.drawStaff();
+		//oled.display();  // Display what's in the buffer (splashscreen)
 		
 		//Debug Recorder
 		myRecorder.printDebug();

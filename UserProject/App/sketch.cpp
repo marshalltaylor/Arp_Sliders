@@ -12,6 +12,7 @@ uint16_t debugCounter = 0;
 TimerClass32 debugTimer( 3000000 );
 TimerClass32 mainPanelTimer( 5000 );
 TimerClass32 lcdFrameTimer( 100000 );
+bool lcdFrameTimerRetick = false;
 
 int32_t executionTimes[4] = {0};
 
@@ -261,12 +262,17 @@ extern void loop()
 		if( delta > executionTimes[0] ) executionTimes[0] = delta;
 	}
 
-	if(lcdFrameTimer.flagStatus() == PENDING)
+	if(lcdFrameTimer.flagStatus() == PENDING || oled.isProcessingFrame())
 	{
 		int32_t time = shitty_micros();
-	
-		//oled.drawFullScreen();
-
+		
+		if( !oled.isProcessingFrame() )
+		{
+			oled.drawFullScreen();
+			//LCD was busy, frame was not processed at all.  hold this timer and keep checking.
+			//lcdFrameTimerRetick = true;
+		}
+		oled.processDirectAccess();
 		int32_t delta = shitty_micros() - time;
 		if( delta > executionTimes[1] ) executionTimes[1] = delta;
 	}
@@ -292,9 +298,12 @@ extern void loop()
 		sprintf(buffer, " oled loop peak: %ld\n", executionTimes[1]);
 		executionTimes[1] = 0;
 		Serial6.print(buffer);
-		mainPanel.printDebug();
-		extMidiClock.printDebug();
-		sDebug.printDebug();
+		
+		//Object debugs -- enable as needed
+		
+		//mainPanel.printDebug();
+		//extMidiClock.printDebug();
+		//sDebug.printDebug();
 	
 		CtrlMIDI.sendRealTime(midi::Clock);
 	}
