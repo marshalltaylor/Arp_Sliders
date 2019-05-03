@@ -17,6 +17,54 @@
 #include <stddef.h>
 #include "SequenceCommon.h"
 #include <string.h>
+
+//**********************************************************************//
+//
+//  Sequence
+//
+PatternElement Sequence::nullStep; // only one copy needed of reference object
+
+Sequence::Sequence( void )
+{
+	nullStep.value = 0;
+	nullStep.velocity = 0;
+	nullStep.gated = false;
+}
+
+PatternElement * Sequence::virtualStep( uint16_t inputStep )
+{
+	uint8_t outputStep;
+	// sanitize!
+	if( (stepsUsed == 0 )||(loopSequenceAtStep == 0) )
+	{
+		return &nullStep;
+	}
+	
+	// Operate by loop config
+	if( loopingControl == LOOPING_DISABLED )
+	{
+		if( inputStep >= stepsUsed )
+		{
+			return &nullStep;
+		}
+		outputStep = inputStep;
+	}
+	else if( loopingControl == LOOPING_AUTO )
+	{
+		outputStep = inputStep % stepsUsed;
+	}
+	else if( loopingControl == LOOPING_MANUAL )
+	{
+		outputStep = inputStep % loopSequenceAtStep;
+		if( outputStep >= stepsUsed )
+		{
+			return &nullStep;
+		}
+	}
+	// Step should be valid here
+	return &step[outputStep];
+}
+	
 //**********************************************************************//
 //
 //  Register

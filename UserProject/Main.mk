@@ -54,6 +54,7 @@ PROJECT_C_SOURCES = \
 ./App/MidiUtils/midiTime.cpp \
 ./App/SequenceTeensyView/SequenceTeensyView.cpp \
 ./App/SequencePlayer/SequencePlayer.cpp \
+./App/SequenceArpeggiator/SequenceArpeggiator.cpp \
 ./App/SequenceRecorder/SequenceRecorder.cpp \
 ./App/SequenceDebug/SequenceDebug.cpp \
 ./App/Sequences/SequenceCommon.cpp
@@ -64,6 +65,7 @@ PROJECT_C_INCLUDES = \
 ./App/graphics \
 ./App/MidiUtils \
 ./App/SequencePlayer \
+./App/SequenceArpeggiator \
 ./App/SequenceRecorder \
 ./App/SequenceDebug \
 ./App/SequenceTeensyView \

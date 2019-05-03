@@ -382,3 +382,23 @@ mmqItemNumber_t MidiMessageLinkedList::seekObjectByNoteValue( MidiMessage * data
   }
   return returnVar;
 }
+
+void MidiMessageLinkedList::printDebug( void )
+{
+	mmqObject_t * tempObject = startObjectPtr;
+	//Print all the objects in the list
+	char buffer[200] = {0};
+	sprintf(buffer, "MidiMessageLinkedList listing\n");
+	Serial6.print(buffer);
+	
+	for (uint8_t i = 0; i < currentPosition; i++)
+	{
+		//****CUSTOM OBJECT TYPE CODE****//
+		sprintf(buffer, "  [%d] 0x%02X 0x%02X 0x%02X 0x%02X at %10lu\n", i, tempObject->channel, tempObject->controlMask, tempObject->value, tempObject->data, tempObject->tick);
+		Serial6.print(buffer);
+
+		//Walk down the list
+		tempObject = tempObject->nextObject;
+	}
+
+}

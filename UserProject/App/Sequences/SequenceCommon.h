@@ -35,13 +35,16 @@ enum LoopingControl_t
 };
 
 //Sequence data
-struct Sequence
+class Sequence
 {
+	static PatternElement nullStep;
+public:
+	Sequence( void );
+	PatternElement * virtualStep( uint16_t );
+	
 	// Note information
 	PatternElement step[MAX_SEQUENCE_STEPS];
 	uint8_t stepsUsed;
-	//bool ctrlNotes[25];
-	//uint8_t ctrlNotesUsed;
 	uint8_t rootNote;
 	// Time information
 	uint8_t ticksPerStep;
@@ -58,6 +61,7 @@ struct Sequence
 	int16_t direction;
 	bool quantize;
 	bool syncDownbeat;
+private:
 };
 
 // Used to make a list of users for a register

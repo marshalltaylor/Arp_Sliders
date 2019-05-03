@@ -211,6 +211,8 @@ public:
 	//int8_t seekObjectbyTimeStamp( uint16_t ); //pass time, returns position
 	mmqItemNumber_t seekObjectByNoteValue( mmqObject_t * ); //pass mmqObject_t, returns position
 	mmqItemNumber_t seekObjectByNoteValue( MidiMessage * data );
+	
+	void printDebug( void );
 private:
 };
 

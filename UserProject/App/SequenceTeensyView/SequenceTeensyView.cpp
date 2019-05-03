@@ -76,7 +76,7 @@ void SequenceTeensyView::drawNotes( float pixelsPerTick )
 
 	do
 	{
-		if( seq->step[currentStep].gated )
+		if( seq->virtualStep(currentStep)->gated )
 		{
 			if( tick <= lastTickEdge + noteLength )
 			{
@@ -88,10 +88,10 @@ void SequenceTeensyView::drawNotes( float pixelsPerTick )
 			}
 		}
 		
-		if( gatedThisTick && (currentStep < seq->stepsUsed))
+		if( gatedThisTick )
 		{
 			// Make 2 bytes for step
-			value = seq->step[currentStep].value;
+			value = seq->virtualStep(currentStep)->value;
 			if( (value >= 36)&&(value <= 84) )
 			{
 				value -= 36;
@@ -107,53 +107,15 @@ void SequenceTeensyView::drawNotes( float pixelsPerTick )
 		// increment
 		tick++;
 		
-		switch( seq->loopingControl )
+		// Roll counters
+		if( tick >= lastTickEdge + stepLength )
 		{
-			default:
-			case LOOPING_DISABLED:
-			{
-				// Roll counters
-				if( tick >= lastTickEdge + stepLength )
-				{
-					currentStep++;
-					lastTickEdge += stepLength;
-					if( currentStep == seq->stepsUsed )
-					{
-						drawing = false;
-					}
-				}
-				break;
-			}
-			case LOOPING_AUTO:
-			{
-				// Roll counters
-				if( tick >= lastTickEdge + stepLength )
-				{
-					currentStep++;
-					lastTickEdge += stepLength;
-					if( currentStep == seq->stepsUsed )
-					{
-						currentStep = 0;
-					}
-				}
-				break;
-			}
-			case LOOPING_MANUAL:
-			{
-				// Roll counters
-				if( tick >= lastTickEdge + stepLength )
-				{
-					currentStep++;
-					lastTickEdge += stepLength;
-					if( currentStep == seq->loopSequenceAtStep )
-					{
-						currentStep = 0;
-					}
-				}
-				break;
-			}
+			currentStep++;
+			lastTickEdge += stepLength;
 		}
-		if( tick > seq->tapeLengthInTicks )
+
+		// Should this be >= instead?
+		if( tick >= seq->tapeLengthInTicks )
 		{
 			drawing = false;
 		}

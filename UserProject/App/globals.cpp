@@ -19,5 +19,6 @@ SequenceTeensyView oled(0,0,0,0,0);
 SequenceRegister sReg[REG_LENGTH];
 
 SequencePlayer myPlayer;
+SequenceArpeggiator myArpeggiator;
 SequenceRecorder myRecorder;
 SequenceDebug sDebug;

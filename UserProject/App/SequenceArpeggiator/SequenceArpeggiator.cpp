@@ -1,17 +1,20 @@
 #include "Arduino.h"
 #include "MidiUtils.h"
-#include "SequencePlayer.h"
+#include "SequenceArpeggiator.h"
 
 #define Serial Serial6
 
+//#define ROOT_OFFSET 48
+#define ROOT_OFFSET 72
+
 //This calls member constructors
-SequencePlayer::SequencePlayer(void) : outputQueue(200), outputNotesOn(127)
+SequenceArpeggiator::SequenceArpeggiator(void) : outputQueue(200), outputNotesOn(127)
 {
 	playHeadTicks = 0;
 	mainRegister = NULL;
 }
 
-void SequencePlayer::attachMainRegister( SequenceRegister * targetRegister )
+void SequenceArpeggiator::attachMainRegister( SequenceRegister * targetRegister )
 {
 	// Remove old association
 	if( mainRegister )
@@ -22,12 +25,59 @@ void SequencePlayer::attachMainRegister( SequenceRegister * targetRegister )
 	mainRegister = targetRegister->addUser(this);
 }
 
-uint16_t SequencePlayer::available( void )
+void SequenceArpeggiator::writeRoot( MidiMessage * input )
+{
+	bool foundInList = false;
+	switch( input->controlMask )
+	{
+		case NoteOn:
+		{
+			// If not in list, add it
+			for( mmqItemNumber_t i = inputNotesOn.listLength() - 1; i >= 0; i-- )
+			{
+				if( inputNotesOn.readObject(i)->value == input->value )
+				{
+					foundInList = true;
+				}
+			}
+			if(!foundInList)
+			{
+				inputNotesOn.pushObject( input );
+				root = input->value;
+				rootChanged = true;
+				gated = true;
+			}
+			break;
+		}
+		case NoteOff:
+		{
+			// Destroy all copies
+			for( mmqItemNumber_t i = inputNotesOn.listLength() - 1; i >= 0; i-- )
+			{
+				if( inputNotesOn.readObject(i)->value == input->value )
+				{
+					inputNotesOn.dropObject(i);
+				}
+			}
+			if( inputNotesOn.listLength() )
+			{
+				// Something is still playing, fall back
+				root = input->value;
+				gated = false;
+				break;
+			}
+			gated = false;
+			break;
+		}
+	}
+}
+
+uint16_t SequenceArpeggiator::available( void )
 {
 	return outputQueue.listLength();
 }
 
-void SequencePlayer::read( MidiMessage * outputObject )
+void SequenceArpeggiator::read( MidiMessage * outputObject )
 {
 	if(!available())
 	{
@@ -44,7 +94,7 @@ void SequencePlayer::read( MidiMessage * outputObject )
 }
 
 // not sure if input is ticks from loop start or delta ticks
-void SequencePlayer::updateTicks( uint32_t ticks )
+void SequenceArpeggiator::updateTicks( uint32_t ticks )
 {
 	// Leave immediately if no register loaded
 	if( mainRegister == NULL )
@@ -112,24 +162,58 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 			}
 		}
 	}
+	
+	// If root changed
+	if( rootChanged )
+	{
+		//Drop everything in the note-on list
+		//send all the note offs
+		uint8_t inspectedObject = 0;
+		while( inspectedObject < outputNotesOn.listLength() )
+		{
+			mmqObject_t * object = outputNotesOn.readObject(inspectedObject);
+			//Drop the note
+			
+			// Convert to note off
+			object->controlMask = NoteOff;
+			// Give to output queue
+			outputQueue.pushObject(object);
+			// Drop from list
+			outputNotesOn.dropObject(inspectedObject);
+		}
+		rootChanged = false;
+	}
 
-	// Figure out what to do
+	// get the pointed to register's sequence data
+	PatternElement * stepReference;
+	stepReference = sequenceData->virtualStep(currentStep);
+	// Figure out what to do for a note on tick
 	if( ticks == currentStep * (uint32_t)sequenceData->ticksPerStep )
 	{
+		// If not gated bail.  Note offs are OK to send
+		if( !gated && !drone )
+		{
+			return;
+		}
 		//note on
 		mmqObject_t newNoteOn;
 		newNoteOn.channel = 0;
 		newNoteOn.controlMask = NoteOn;
-		// get the pointed to register's sequence data
-		newNoteOn.value = sequenceData->virtualStep(currentStep)->value;
-		newNoteOn.data = 127;
-		// gated?  other parameters?
-		if( newNoteOn.value != 0 )
+		if((stepReference->value != 0) && (stepReference->gated))// gated?  other parameters?
 		{
+			int16_t calcValue = (int16_t)stepReference->value + root - ROOT_OFFSET;
+			// Screen output
+			if( (calcValue < 0)||(calcValue >= 127 ) )
+			{
+				return;
+			}
+			newNoteOn.value = calcValue;
+			newNoteOn.data = 127;
 			outputNotesOn.pushObject(&newNoteOn);
 			outputQueue.pushObject(&newNoteOn);
 		}
 	}
+	// and a note off tick
 	if( ticks == (currentStep * (uint32_t)sequenceData->ticksPerStep) + ticksPerHalfStep )
 	{
 		//note off
@@ -137,27 +221,35 @@ void SequencePlayer::updateTicks( uint32_t ticks )
 		mmqObject_t newNoteOff;
 		newNoteOff.channel = 0;
 		newNoteOff.controlMask = NoteOff;
-		// get the pointed to register's sequence data
-		newNoteOff.value = sequenceData->virtualStep(currentStep)->value;
-		newNoteOff.data = 0;
-		if( newNoteOff.value != 0 )
+		if((stepReference->value != 0) && (stepReference->gated))// gated?  other parameters?
 		{
+			newNoteOff.value = stepReference->value + root - ROOT_OFFSET;
+			newNoteOff.data = 0;
 			mmqItemNumber_t seekResult = outputNotesOn.seekObjectByNoteValue(&newNoteOff);
 			if( seekResult != -1 )
 			{
 				outputNotesOn.dropObject(seekResult);
+				outputQueue.pushObject(&newNoteOff);
 			}
-			// Always send note-off, who knows what harm it will do?
-			outputQueue.pushObject(&newNoteOff);
+			// Could always send note-off, who knows what harm it will do?
 		}
 	}
 }
 
-void SequencePlayer::printDebug( void )
+void SequenceArpeggiator::printDebug( void )
 {
 	
 	char buffer[200] = {0};
-	sprintf(buffer, "SequencePlayer TODO: Write debug routine\n");
+	sprintf(buffer, "SequenceArpeggiator Brief\n");
 	Serial6.print(buffer);
+	sprintf(buffer, "  gated: %d\n  drone: %d\n  rootChanged: %d\n  root: %d\n", gated, drone, rootChanged, root);
+	Serial6.print(buffer);
+	inputNotesOn.printDebug();
+	outputNotesOn.printDebug();
 
+}
+
+void SequenceArpeggiator::configDrone( bool input )
+{
+	drone = input;
 }

@@ -26,6 +26,7 @@ public:
 	void recordNote( MidiMessage * );
 	void recordRest( void );
 	void setTapeLengthInBeats( uint8_t );
+	void setTapeLengthInTicks( uint16_t );
 	void setStepLength( uint8_t ticks );
 	void setLoopAtStep( uint8_t step );
 	void setLoopingControl( LoopingControl_t data );

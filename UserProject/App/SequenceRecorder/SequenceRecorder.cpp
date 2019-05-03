@@ -77,7 +77,13 @@ void SequenceRecorder::clearAndInit( void )
 
 void SequenceRecorder::setTapeLengthInBeats( uint8_t newLen )
 {
-	localStorage.tapeLengthInTicks = newLen * 24;
+	setTapeLengthInTicks( newLen * 24 );
+	saveLocalStorage();
+}
+
+void SequenceRecorder::setTapeLengthInTicks( uint16_t newLen )
+{
+	localStorage.tapeLengthInTicks = newLen;
 	saveLocalStorage();
 }
 

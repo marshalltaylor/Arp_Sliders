@@ -51,21 +51,6 @@ void handleStop( void )
 	
 void handleNoteOn(byte channel, byte pitch, byte velocity)
 {
-	//MidiMessage newMessage;
-	//newMessage.controlMask = NoteOn;
-	//newMessage.channel = channel;
-	//newMessage.value = pitch;
-	//newMessage.data = velocity;
-	////digitalWrite(D6, 0);
-	//if(1)
-	//{
-	//	char buffer[200] = {0};
-	//	sprintf(buffer, "MIDILIB: Mask=0x%d, Chan=%d, note=%d, 0x%X\n", newMessage.controlMask, newMessage.channel, newMessage.value, newMessage.data);
-	//	Serial6.print(buffer);
-	//}
-	////controlNoteMixer.input( 0x09, channel, pitch, velocity );
-	//outputNoteMixer.keyboardInput( &newMessage );
-	
 	MidiMessage newMsg;
 	newMsg.controlMask = NoteOn;
 	newMsg.channel = channel;
@@ -82,47 +67,37 @@ void handleNoteOn(byte channel, byte pitch, byte velocity)
 
 void handleNoteOff(byte channel, byte pitch, byte velocity)
 {
-	MidiMessage newMessage;
-	newMessage.controlMask = NoteOff;
-	newMessage.channel = channel;
-	newMessage.value = pitch;
-	newMessage.data = velocity;
-	//digitalWrite(D6, 1);
-	//controlNoteMixer.input( 0x08, channel, pitch, velocity );
-	outputNoteMixer.keyboardInput( &newMessage );
+	//MidiMessage newMsg;
+	//newMsg.controlMask = NoteOff;
+	//newMsg.channel = channel;
+	//newMsg.value = pitch;
+	//newMsg.data = velocity;
+	////digitalWrite(D6, 1);
+	////controlNoteMixer.input( 0x08, channel, pitch, velocity );
+	//myArpeggiator.writeRoot(&newMsg);
+	////outputNoteMixer.keyboardInput( &newMsg );
 }
 
 void handleCtrlNoteOn(byte channel, byte pitch, byte velocity)
 {
-	//if((pitch < 48)||(pitch > 72))
-	//{
-	//	return;
-	//}
-	//mainPanel.inputCtrlNote(pitch - 48);
+	MidiMessage newMsg;
+	newMsg.controlMask = NoteOn;
+	newMsg.channel = channel;
+	newMsg.value = pitch;
+	newMsg.data = velocity;
 	
-	/******** PORTABLE DEBUG ********/
-	//char buffer[200] = {0};
-	//sprintf(buffer, "sktch NoteOn: %d\n", pitch);
-	//Serial6.print(buffer);	
-	
-	//MidiMessage newMsg;
-	//newMsg.controlMask = NoteOn;
-	//newMsg.channel = channel;
-	//newMsg.value = pitch;
-	//newMsg.data = velocity;
-	//
-	////Recorder
-	//if( mainPanel.isRecording() )
-	//{
-	//	myRecorder.recordNote(&newMsg);
-	//	myRecorder.printDebug();
-	//}
+	myArpeggiator.writeRoot(&newMsg);
 }
 
 void handleCtrlNoteOff(byte channel, byte pitch, byte velocity)
 {
 	//Should be copyish of other
-
+	MidiMessage newMsg;
+	newMsg.controlMask = NoteOff;
+	newMsg.channel = channel;
+	newMsg.value = pitch;
+	newMsg.data = velocity;
+	myArpeggiator.writeRoot(&newMsg);
 }
 
 /***** Control MIDI Callbacks *************************************************/
@@ -161,14 +136,22 @@ void sketchTickCallback(MidiClock * caller)
 		default:
 		case Playing:
 			oled.setPlayHead(caller->ticks);
-			myPlayer.updateTicks(caller->ticks);
-			if(myPlayer.available())
+			//myPlayer.updateTicks(caller->ticks);
+			//if(myPlayer.available())
+			//{
+			//	mmqObject_t readObject;
+			//	myPlayer.read(&readObject);
+			//	MIDI.send((midi::MidiType)readObject.controlMask, readObject.value, readObject.data, 1);
+			//	Serial6.print("MIDI OUT!");
+			//}
+			myArpeggiator.updateTicks(caller->ticks);
+			if(myArpeggiator.available())
 			{
 				mmqObject_t readObject;
-				myPlayer.read(&readObject);
+				myArpeggiator.read(&readObject);
 				MIDI.send((midi::MidiType)readObject.controlMask, readObject.value, readObject.data, 1);
 				Serial6.print("MIDI OUT!");
-			}
+			}			
 		case Paused:
 			Serial6.print("ticks = ");
 			Serial6.println(caller->ticks);
@@ -226,6 +209,7 @@ extern void setup()
 	myRecorder.attachMainRegister(&sReg[REG_ARP]);
 	myRecorder.clearAndInit();
 	myPlayer.attachMainRegister(&sReg[REG_ARP]);
+	myArpeggiator.attachMainRegister(&sReg[REG_ARP]);
 	sDebug.attachMainRegister(&sReg[REG_ARP]);
 	
 	// Set up LCD to segment
@@ -287,25 +271,29 @@ extern void loop()
 	
 	if(debugTimer.flagStatus() == PENDING)
 	{
-		//User code
-		char buffer[200] = {0};
-		//sprintf(buffer, "__DEBUG______\nintPlayState = %d, extPlayState = %d\nbeatLedState = %d, playLedState = %d\nFreeStack() = %d\n\n", intMidiClock.getState(), extMidiClock.getState(), statusPanel.getBeatLedState(), statusPanel.getPlayLedState(), FreeStack());
-		sprintf(buffer, "\n\n__DEBUG__\nFreeStack() = %d\n", FreeStack());
-		Serial6.print(buffer);
-		sprintf(buffer, "panel loop peak: %ld\n", executionTimes[0]);
-		executionTimes[0] = 0;
-		Serial6.print(buffer);
-		sprintf(buffer, " oled loop peak: %ld\n", executionTimes[1]);
-		executionTimes[1] = 0;
-		Serial6.print(buffer);
+		if(1)
+		{
+			//User code
+			char buffer[200] = {0};
+			//sprintf(buffer, "__DEBUG______\nintPlayState = %d, extPlayState = %d\nbeatLedState = %d, playLedState = %d\nFreeStack() = %d\n\n", intMidiClock.getState(), extMidiClock.getState(), statusPanel.getBeatLedState(), statusPanel.getPlayLedState(), FreeStack());
+			sprintf(buffer, "\n\n__DEBUG__\nFreeStack() = %d\n", FreeStack());
+			Serial6.print(buffer);
+			sprintf(buffer, "panel loop peak: %ld\n", executionTimes[0]);
+			executionTimes[0] = 0;
+			Serial6.print(buffer);
+			sprintf(buffer, " oled loop peak: %ld\n", executionTimes[1]);
+			executionTimes[1] = 0;
+			Serial6.print(buffer);
+			
+			//Object debugs -- enable as needed
+			
+			//mainPanel.printDebug();
+			//extMidiClock.printDebug();
+			//sDebug.printDebug();
+			myArpeggiator.printDebug();
 		
-		//Object debugs -- enable as needed
-		
-		//mainPanel.printDebug();
-		//extMidiClock.printDebug();
-		//sDebug.printDebug();
-	
-		CtrlMIDI.sendRealTime(midi::Clock);
+			CtrlMIDI.sendRealTime(midi::Clock);
+		}
 	}
 	
 }

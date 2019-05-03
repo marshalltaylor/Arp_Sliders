@@ -49,16 +49,16 @@ SlidersPanel::SlidersPanel( void )
 	add( &slider3 );
 	slider3.setLowerKnobVal(10);
 	slider3.setUpperKnobVal(1014);
-	slider4.setLowerIntVal(0);
-	slider4.setUpperIntVal(5);
-	slider4.setSamplesAveraged(10);
+	slider3.setLowerIntVal(0);
+	slider3.setUpperIntVal(5);
+	slider3.setSamplesAveraged(10);
 
 	slider4.setHardware(new ArduinoAnalogIn( A3 ));
 	add( &slider4 );
 	slider4.setLowerKnobVal(10);
 	slider4.setUpperKnobVal(1014);
 	slider4.setLowerIntVal(0);
-	slider4.setUpperIntVal(5);
+	slider4.setUpperIntVal(30);
 	slider4.setSamplesAveraged(10);
 
 	slider5.setHardware(new ArduinoAnalogIn( A4 ));
@@ -95,6 +95,7 @@ void SlidersPanel::reset( void )
 	glideRate = 50; //knob1.getAsInt16() * 1000;
 	intMidiClock.setBPM(currentBPM / 1000);
 	
+	myArpeggiator.configDrone(true);
 }
 
 void SlidersPanel::tickStateMachine( int msTicksDelta )
@@ -176,11 +177,11 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 	}
 	if( sw3Up.serviceRisingEdge() )
 	{
-		//outputPlayer.setDrone(1);
+		myArpeggiator.configDrone(true);
 	}
 	if( sw3Up.serviceFallingEdge() )
 	{
-		//outputPlayer.setDrone(0);
+		myArpeggiator.configDrone(false);
 	}
 	if( sw4Up.serviceRisingEdge() ||
 		sw4Up.serviceFallingEdge() ||
@@ -258,7 +259,7 @@ void SlidersPanel::tickStateMachine( int msTicksDelta )
 	}
 	if( slider4.serviceChanged() )
 	{
-		myRecorder.setStepLength( 3 * (1 << slider4.getAsInt16()) ); //lowest is 32nd note
+		myRecorder.setStepLength( 3 + slider4.getAsInt16() ); //lowest is 32nd note
 	}
 	if( slider5.serviceChanged() )
 	{

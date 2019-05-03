@@ -10,6 +10,7 @@
 #include <TeensyView.h>  // Include the SFE_TeensyView library
 #include "SequenceTeensyView.h"
 #include "SequencePlayer.h"
+#include "SequenceArpeggiator.h"
 #include "SequenceRecorder.h"
 #include "SequenceDebug.h"
 
@@ -41,6 +42,7 @@ enum
 extern SequenceRegister sReg[];
 
 extern SequencePlayer myPlayer;
+extern SequenceArpeggiator myArpeggiator;
 extern SequenceRecorder myRecorder;
 extern SequenceDebug sDebug;
 
