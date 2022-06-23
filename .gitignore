@@ -1,4 +1,5 @@
-/UserProject/build/*
+**build**
+!tools/build
 
 # Prerequisites
 *.d

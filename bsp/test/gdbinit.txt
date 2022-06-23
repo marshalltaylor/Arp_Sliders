@@ -1,0 +1,14 @@
+handle SIGINT
+target ext:3333
+load
+#run
+#break main.c:100
+#break stm32f4xx_hal.c:177
+#break stm32f4xx_hal_cortex.c:247
+#break tim.c:72
+#break main_bsp.c:100
+#break usart.c:473
+#break usart.c:490
+#break tim.c:210
+#break stm32f4xx_hal_tim.c:4308
+set print pretty on
