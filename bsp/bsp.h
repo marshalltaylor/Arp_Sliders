@@ -20,9 +20,18 @@ extern "C" {
 // Must match PinData_t const array order (bspPins.c)
 typedef enum
 {
-    SPI_CS,
-    ADC_SEL_0,
-    ADC_SEL_1,
+    SW_HIGH_POS_0,
+    SW_HIGH_POS_1,
+    SW_HIGH_POS_2,
+    SW_HIGH_POS_3,
+    SW_HIGH_POS_4,
+    SW_LOW_POS_0,
+    SW_LOW_POS_1,
+    SW_LOW_POS_2,
+    SW_LOW_POS_3,
+    SW_LOW_POS_4,
+    TV_NOT_RESET,
+    TV_DATA_NOT_COMMAND,
     NUMBER_OF_PINS
 } PinNumber_t;
 
