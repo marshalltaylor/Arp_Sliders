@@ -40,7 +40,6 @@ UserProject/Src/unused_int.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c \
 UserProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c \
-CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c \
@@ -56,7 +55,7 @@ CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
 UserProject/Src/system_stm32f4xx.c \
-UserProject/Src/stm32f4xx_hal_timebase_TIM.c \
+UserProject/Src/stm32f4xx_hal_timebase_tim.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usart.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_gpio.c \
 CubeProject/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_dma.c \

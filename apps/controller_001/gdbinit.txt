@@ -1,0 +1,11 @@
+handle SIGINT
+target ext:3333
+load
+#run
+#break unused_int.c:25
+#break hal_main.c:285
+#break hal_uart.c:61
+#break stm32f7xx_it.c:290
+#break main.cpp:23
+#break stm32f4xx_hal_uart.c:1198
+#break SegmentVideo.cpp:39

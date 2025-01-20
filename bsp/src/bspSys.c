@@ -2,11 +2,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <string.h>
 
 /* Includes -- HAL -----------------------------------------------------------*/
 #include "main_cubemx.h"
 #include "tim.h"
 #include "stm32f4xx_it.h"
+#include "stm32f446xx.h"
 
 /* Includes -- BSP -----------------------------------------------------------*/
 #include "bsp.h"
@@ -55,4 +57,23 @@ void bspDelay(uint32_t delayInput)
         //Rolled -- XOR two regions
         while(!(msTicks > now) != !(msTicks < targetTicks));
     }
+}
+
+#define USER_FLASH_ADDRESS 0x08060000
+
+void bspFlashRead(uint8_t * pData, uint32_t len)
+{
+    memcpy(pData, (uint8_t*)USER_FLASH_ADDRESS, len);
+}
+
+void bspFlashWrite(uint8_t * pData, uint32_t len)
+{
+    HAL_FLASH_Unlock();
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGSERR );
+    FLASH_Erase_Sector(FLASH_SECTOR_7, VOLTAGE_RANGE_3);
+    for (int i = 0; i < len; i++)
+    {
+       HAL_FLASH_Program(TYPEPROGRAM_BYTE, USER_FLASH_ADDRESS + i, pData[i]);
+    }
+    HAL_FLASH_Lock();
 }

@@ -15,6 +15,7 @@ extern "C" {
 
 #include "bspSpi.h"
 #include "bspPins.h"
+#include "src/bspSys.h"
 
 /* Types ---------------------------------------------------------------------*/
 // Must match PinData_t const array order (bspPins.c)
@@ -32,6 +33,9 @@ typedef enum
     SW_LOW_POS_4,
     TV_NOT_RESET,
     TV_DATA_NOT_COMMAND,
+    DEBUG_0,
+    DEBUG_1,
+    DEBUG_2,
     NUMBER_OF_PINS
 } PinNumber_t;
 

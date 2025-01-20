@@ -16,8 +16,9 @@ CommandTable::CommandTable(void)
     cmds[7] = &adcCmd;
     cmds[8] = &midiCmd;
     cmds[9] = &settingsCmd;
+    cmds[10] = &appCmd;
     
-    cmdLen = 10;
+    cmdLen = 11;
 };
 
 int CommandTable::run(int argc, char *argv[])

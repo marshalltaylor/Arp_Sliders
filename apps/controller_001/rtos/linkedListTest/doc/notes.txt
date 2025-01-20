@@ -1,0 +1,28 @@
+How does the linked list work?
+
+Main uses the linked list item type (has knowledge of it anyway)
+
+The linked list operates on byte length, and has no knowledge
+of the type of item it uses!!!
+
+
+Pushes, etc.
+
+Linked list itself can print, and some other fucntions.
+
+
+To create a new linked list based piece of code:
+
+Define your object type in a file
+Use the object type while operating the list
+
+Example:
+
+TODO:?
+
+In a file, create the data struct and copy in the example
+class from the unit test.  It inherits linkedList and contribuites
+a debug print function.
+
+Create a c file for the example list print, and rename everything
+
