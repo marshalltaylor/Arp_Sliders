@@ -55,8 +55,8 @@ int appProgram(int argc, char *argv[])
         //}
         
         //Load test data
-        fillListWithTestData(&mainNoteList, real4bar);
-        player.seq->length = 8 * 24;
+        //fillListWithTestData(&mainNoteList, real4bar);
+        //player.seq->length = 8 * 24;
     }
     
     if(all || 0 == strcmp((const char*)argv[0], "mem"))
@@ -64,7 +64,7 @@ int appProgram(int argc, char *argv[])
         //Print mem info
         printPoolInfo(&pool_20);
         printPoolInfo(&pool_32);
-        player.printInfo();
+        //player.printInfo();
     }
     
     if(all || 0 == strcmp((const char*)argv[0], "model"))
@@ -76,15 +76,15 @@ int appProgram(int argc, char *argv[])
     if(all || 0 == strcmp((const char*)argv[0], "seq"))
     {
         localPrintf("-- mainNoteList --\n");
-        mainNoteList.printList();
+        //mainNoteList.printList();
         localPrintf("-- backupNoteList --\n");
-        backupNoteList.printList();
+        //backupNoteList.printList();
         localPrintf("-- sequence info --\n");
-        localPrintf(" channel: %d\n", player.seq->channel);
-        localPrintf(" playing: %d\n", player.seq->playing);
-        localPrintf(" playHead: %d\n", player.seq->playHead);
-        localPrintf(" length: %d\n", player.seq->length);
-        localPrintf(" syncState: %d\n", player.seq->syncState);
+        //localPrintf(" channel: %d\n", player.seq->channel);
+        //localPrintf(" playing: %d\n", player.seq->playing);
+        //localPrintf(" playHead: %d\n", player.seq->playHead);
+        //localPrintf(" length: %d\n", player.seq->length);
+        //localPrintf(" syncState: %d\n", player.seq->syncState);
     }
     
     if(all || 0 == strcmp((const char*)argv[0], "arp"))
@@ -92,7 +92,7 @@ int appProgram(int argc, char *argv[])
         //Print mem info
         if (argc < 2)
         {
-            arp.printInfo();
+            //arp.printInfo();
             
             localPrintf(" Extra arguments: <cmd> <value>\n");
             localPrintf("  cmd: e, mode, step, pat\n");
@@ -103,7 +103,7 @@ int appProgram(int argc, char *argv[])
             if (0 == strcmp((const char*)argv[1], "c"))
             {
                 localPrintf("Clearing arp\n");
-                arp.clearPattern();
+                //arp.clearPattern();
             }
         }
         //Process 2 field commands
@@ -113,22 +113,22 @@ int appProgram(int argc, char *argv[])
             if (0 == strcmp((const char*)argv[1], "e"))
             {
                 localPrintf("Enable: %d\n", value);
-                arp.enableArp(value);
+                //arp.enableArp(value);
             }
             if (0 == strcmp((const char*)argv[1], "mode"))
             {
                 localPrintf("Mode: %d\n", value);
-                arp.enablePatternEntry(value);
+                //arp.enablePatternEntry(value);
             }
             if (0 == strcmp((const char*)argv[1], "step"))
             {
                 localPrintf("step period: %d\n", value);
-                arp.setQuantizeNotePeriod(value);
+                //arp.setQuantizeNotePeriod(value);
             }
             if (0 == strcmp((const char*)argv[1], "pat"))
             {
                 localPrintf("pattern len: %d\n", value);
-                arp.length = value;
+                //arp.length = value;
             }
         }
     }

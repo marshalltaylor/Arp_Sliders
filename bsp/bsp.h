@@ -36,6 +36,7 @@ typedef enum
     DEBUG_0,
     DEBUG_1,
     DEBUG_2,
+    SPI_CS,
     NUMBER_OF_PINS
 } PinNumber_t;
 

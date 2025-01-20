@@ -1,10 +1,11 @@
 #include "bsp.h"
 #include "commands.h"
+#include "globals.h"
 
 // Connect directly to bsp.
 #define localPrintf bspPrintf
 
-extern spiDevice_t controlPanelSpi;
+extern spiDevice_t screen;
 
 int spiProgram(int argc, char *argv[]);
 
@@ -17,17 +18,26 @@ commandInfo_t spiCmd = {
 
 int spiProgram(int argc, char *argv[])
 {
-    if(0 == strcmp((const char*)argv[0], "tx"))
+    if(0 == strcmp((const char*)argv[0], "gr"))
+    {
+        localPrintf("graphics data out\n");
+        oled.setCursor(1, 1);
+        oled.write('h');
+        oled.write('!');
+        oled.display();
+    }
+    else if(0 == strcmp((const char*)argv[0], "tx"))
     {
         int val = strtol(argv[1], NULL, 16);
         localPrintf("value: %d, 0x%X\n", val, val);
-        controlPanelSpi.txData[0] = (uint8_t)val;
-        controlPanelSpi.txData[1] = (uint8_t)val;
-        bspSPIWriteWait(&controlPanelSpi);
+        screen.txData[0] = (uint8_t)val;
+        screen.txData[1] = (uint8_t)val;
+        screen.len = 2;
+        bspSPIWriteWait(&screen);
         localPrintf("Rx:");
         for(int i = 0; i < 4; i++)
         {
-            localPrintf("%X", controlPanelSpi.rxData[i]);
+            localPrintf("%X", screen.rxData[i]);
         }
         localPrintf("\n");
     }
@@ -35,9 +45,9 @@ int spiProgram(int argc, char *argv[])
     {
         for(int i = 0; i < 256; i++)
         {
-            controlPanelSpi.txData[0] = (uint8_t)i;
-            controlPanelSpi.txData[1] = (uint8_t)i;
-            if(!bspSPIWrite(&controlPanelSpi))
+            screen.txData[0] = (uint8_t)i;
+            screen.txData[1] = (uint8_t)i;
+            if(!bspSPIWrite(&screen))
             {
                 localPrintf("Fail\n");
             }
@@ -50,18 +60,18 @@ int spiProgram(int argc, char *argv[])
         uint8_t data[2];
         while(1)
         {
-            controlPanelSpi.txData[0] = 0x12;
-            controlPanelSpi.txData[1] = 0x34;
-            bspSPIWriteWait(&controlPanelSpi);
+            screen.txData[0] = 0x12;
+            screen.txData[1] = 0x34;
+            bspSPIWriteWait(&screen);
             
-            if((controlPanelSpi.rxData[0] != data[0])||(controlPanelSpi.rxData[1] != data[1]))
+            if((screen.rxData[0] != data[0])||(screen.rxData[1] != data[1]))
             {
-                data[0] = controlPanelSpi.rxData[0];
-                data[1] = controlPanelSpi.rxData[1];
+                data[0] = screen.rxData[0];
+                data[1] = screen.rxData[1];
                 localPrintf("Rx:");
                 for(int i = 0; i < 2; i++)
                 {
-                    localPrintf("%X", controlPanelSpi.rxData[i]);
+                    localPrintf("%X", screen.rxData[i]);
                 }
                 localPrintf("\n");
             }
@@ -69,24 +79,24 @@ int spiProgram(int argc, char *argv[])
     }
     else if(0 == strcmp((const char*)argv[0], "sniff"))
     {
-        uint8_t sz = controlPanelSpi.len;
+        uint8_t sz = screen.len;
         uint8_t txData[sz];
         uint8_t rxData[sz];
         while(1)
         {
-            bspSPIWriteWait(&controlPanelSpi);
+            bspSPIWriteWait(&screen);
             bool isMatch = true;
             for(int i = 0; i < sz; i++)
             {
-                if(controlPanelSpi.rxData[i] != rxData[i])
+                if(screen.rxData[i] != rxData[i])
                 {
                     isMatch = false;
-                    rxData[i] = controlPanelSpi.rxData[i];
+                    rxData[i] = screen.rxData[i];
                 }
-                else if(controlPanelSpi.txData[i] != txData[i])
+                else if(screen.txData[i] != txData[i])
                 {
                     isMatch = false;
-                    txData[i] = controlPanelSpi.txData[i];
+                    txData[i] = screen.txData[i];
                 }
             }
             if(!isMatch)

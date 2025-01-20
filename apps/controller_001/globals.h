@@ -19,9 +19,7 @@
 #include "model.h"
 #include "view.h"
 #include "controller.h"
-#include "midiNoteList.h"
 #include "pool.h"
-#include "midiMod_outputPort.h"
 
 /* References ----------------------------------------------------------------*/
 ////Defined in bspTime.h
@@ -42,50 +40,17 @@ extern Controller controller;
 
 extern uint32_t hwTimerInterval;
 
+#include "TeensyView.h"
+extern TeensyView oled;
+
 extern Pool pool_20;
 extern Pool pool_32;
 
-#include "midiTime.h"
-extern MidiClock midiClock;
-
-#include "sequence.h"
-#include "sequenceTest/sequenceTest.h"
-extern NoteList mainNoteList;
-extern NoteList altNoteList;
-extern NoteList backupNoteList;
-
-extern sequence_t mainSequence;
-extern sequence_t altSequence;
-
-#include "sequencePlayer.h"
-extern SequencePlayer player;
-
-#include "noteOnList.h"
-extern NoteOnList noteOnList;
+#include "midiMod_outputPort.h"
 
 #include "midiMod_outputMixer.h"
 extern OutputMixer outputMixer;
 
-#include "midiMod_splitChannels.h"
-extern SplitChannels splitChannels;
-
-#include "legacyAdapter.h"
-extern LegacyAdapter legacyAdapter;
-
-#include "aux_controllers.h"
-extern AuxController auxCtrl;
-
-#include "inputNoteList.h"
-extern InputNoteList inputNoteList;
-
-#include "arp.h"
-extern ArpModule arp;
-extern NoteOnList ArpNoteOnList;
-
-#include "midiTimeQuantize.h"
-extern QCalculator qInputBeat;
-extern QCalculator qPattern;
-extern QCalculator qPatternHalf;
 
 //Defined in globals.cpp
 float power(float x, int y);

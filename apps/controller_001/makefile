@@ -32,26 +32,16 @@ mvc/commands/settingsEditor.cpp \
 mvc/commands/appTest.cpp \
 synth/midiCommon.cpp \
 synth/midiMod.cpp \
-synth/midiNoteList.cpp \
-synth/noteOnList.cpp \
-synth/sequencePlayer.cpp \
-synth/InputNoteList.cpp \
-synth/midiTime.cpp \
-synth/midiTimeQuantize.cpp \
-synth/sequence.cpp \
-synth/sequenceTest/sequenceTest.cpp \
-synth/sequenceTest/sequenceTestData.cpp \
 synth/midiMod_outputMixer.cpp \
 synth/midiMod_outputPort.cpp \
-synth/midiMod_splitChannels.cpp \
-synth/legacyAdapter.cpp \
-synth/aux_controllers.cpp \
-synth/arp.cpp \
+graphics/TeensyView.cpp \
+graphics/spiDisplay.c \
 
 SOURCE_DIRS = . \
 rtos \
 synth \
 synth/sequenceTest \
+graphics \
 mvc \
 mvc/commands \
 
@@ -60,6 +50,7 @@ mvc/commands \
 C_INCLUDES = . \
 rtos \
 synth \
+graphics \
 mvc \
 mvc/commands \
 $(SYNTH_COMMON_ROOT)/FreeRTOS/Source/portable/GCC/ARM_CM4F \

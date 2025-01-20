@@ -13,6 +13,8 @@
 #include "bspSpi.h"
 
 /* References ----------------------------------------------------------------*/
+#define localPrintf bspPrintf
+
 spiControl_t spiCtrl;
 
 /* Functions -----------------------------------------------------------------*/
@@ -34,11 +36,13 @@ bool bspSPIWrite(spiDevice_t * dev)
 
 	if(retVal != HAL_OK)
 	{
+        localPrintf("ERROR SPI ! HAL_OK\n");
 		spiCtrl.userDevice = NULL;
 		return false;
 	}
 	else
 	{
+        //localPrintf("SPI HAL_OK, write %d\n", spiCtrl.userDevice->len);
 		return true;
 	}
 }
@@ -65,7 +69,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
 	if(spiCtrl.userDevice == NULL)
 	{
-		printf("ERROR SPI callback\n");
+		localPrintf("ERROR SPI callback\n");
 	}
 	else
 	{

@@ -22,7 +22,7 @@ int midiProgram(int argc, char *argv[])
     
     if(all || 0 == strcmp((const char*)argv[0], "clock"))
     {
-        midiClock.printDebug();
+        //midiClock.printDebug();
     }
     if(all || 0 == strcmp((const char*)argv[0], "outs"))
     {
@@ -30,7 +30,7 @@ int midiProgram(int argc, char *argv[])
     }
     if(all || 0 == strcmp((const char*)argv[0], "ins"))
     {
-        inputNoteList.printList();
+        //inputNoteList.printList();
     }
     if (!all && 0 == strcmp((const char*)argv[0], "g"))
     {
@@ -42,10 +42,10 @@ int midiProgram(int argc, char *argv[])
         {
             bool enb = strtol(argv[1], NULL, 10);
             localPrintf("Midi graph debug = %d\n", enb);
-            splitChannels.setDebug(enb);
-            legacyAdapter.setDebug(enb);
-            auxCtrl.setDebug(enb);
-            arp.setDebug(enb);
+            //splitChannels.setDebug(enb);
+            //legacyAdapter.setDebug(enb);
+            //auxCtrl.setDebug(enb);
+            //arp.setDebug(enb);
             outputMixer.setDebug(enb);
         }
     }

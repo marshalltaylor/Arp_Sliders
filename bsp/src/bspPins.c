@@ -32,6 +32,7 @@ const PinData_t pins[NUMBER_OF_PINS] = {
     {PORTC_OFFSET, GPIO_PIN_10},
     {PORTC_OFFSET, GPIO_PIN_12},
     {PORTC_OFFSET, GPIO_PIN_11},
+    {PORTA_OFFSET, GPIO_PIN_15},
 };
 
 #ifdef __cplusplus

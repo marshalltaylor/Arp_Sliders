@@ -18,37 +18,34 @@ public:
     void saveSettingsToFlash(void);
     void resetDefaultSettings(void);
     void gateLedOneShot(void);
-    Led ledGate;
-    bool checkFirstInput(void);
-    void stopRecording(void);
-    void clockGood(void);
-    void clockBad(void);
-    void clockLost(uint8_t clkNum);
-    //Flags that emulate button functions
-    MessagingFlag midiCtlRec;
-    MessagingFlag midiCtlPlay;
-    void startPlayingAbsolute(void);
-    void startPlayingSynchronously(uint32_t clocks);
-    void stopPlaying(void);
 
     bool initialized;
     
 private:
-    Led ledPlay;
+    Led ledGate;
     Led ledRec;
     Led ledStatus;
     
-    Button buttonClear;
-    Button buttonRest;
-    Button buttonRec;
-    Button buttonPlay;
+    Button sw1Up;
+    Button sw2Up;
+    Button sw3Up;
+    Button sw4Up;
+    Button sw5Up;
+    Button sw1Down;
+    Button sw2Down;
+    Button sw3Down;
+    Button sw4Down;
+    Button sw5Down;
     
-    Selector knobQuantize;
-    RangedSelector knobMode;
+    Windowed10BitKnob slider1;
+    Windowed10BitKnob slider2;
+    Windowed10BitKnob slider3;
+    Windowed10BitKnob slider4;
+    Windowed10BitKnob slider5;
+    Windowed10BitKnob slider6;
     
     uint16_t gateLedTimeToLive = 0;
     
-    bool isThisActionARest;
 };
 
 #endif
