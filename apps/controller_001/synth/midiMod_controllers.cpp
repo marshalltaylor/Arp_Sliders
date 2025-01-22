@@ -4,6 +4,8 @@
 
 #define localPrintf bspPrintf
 
+static bool hasTicked = false;
+
 Controllers::Controllers(void)
 {
 }
@@ -131,6 +133,16 @@ void Controllers::setChannel(uint8_t index, uint8_t channel)
 
 void Controllers::tick(void)
 {
+    if (!hasTicked)
+    {
+        //On first tick, don't tx anything, just load the state vars
+        for(int i = 0; i < MIDI_MOD_CONTROLLERS_MAX; i++)
+        {
+            lastControllerValue[i] = controllerValue[i];
+        }
+        //Don't do this again
+        hasTicked = true;
+    }
     for(int i = 0; i < MIDI_MOD_CONTROLLERS_MAX; i++)
     {
         if (lastControllerValue[i] != controllerValue[i])

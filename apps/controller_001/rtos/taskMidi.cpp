@@ -37,7 +37,7 @@ Logging logTaskLog;
 #endif
 /* References ----------------------------------------------------------------*/
 
-#define MIDI_CTRL_TX_LOOP_TARGET 50
+#define MIDI_CTRL_TX_LOOP_TARGET 10
 
 static uint32_t loopCtr = 0;
 
