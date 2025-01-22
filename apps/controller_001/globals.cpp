@@ -28,7 +28,8 @@ uint32_t hwTimerInterval = 100;
 // midiMod modules
 OutputPort outMain;
 OutputPort outAux;
-OutputMixer outputMixer;
+Merger merger;
+Controllers controllers;
 
 /* References ----------------------------------------------------------------*/
 extern void handleClock1(void);
@@ -72,9 +73,8 @@ extern "C" void globalsInit(void)
     MIDI.setHandleNoteOff(handleNoteOff1);
     MIDI.setHandleControlChange(handleControlChange1);
     MIDI.setHandlePitchBend(handlePitchBend1);
-    
     //Thru option:
-    MIDI.turnThruOff();
+    //MIDI.turnThruOff();
     
     CtrlMIDI.setHandleClock(handleClock2);
     CtrlMIDI.setHandleStart(handleStart2);
@@ -84,7 +84,7 @@ extern "C" void globalsInit(void)
     CtrlMIDI.setHandleNoteOff(handleNoteOff2);
     CtrlMIDI.setHandleControlChange(handleControlChange2);
     //Thru option:
-    CtrlMIDI.turnThruOff();
+    //CtrlMIDI.turnThruOff();
     
     // Write our function address into the hw timer
     timer3setPeriod(hwTimerInterval);
@@ -108,4 +108,20 @@ extern "C" void globalsInit(void)
     //arp.setOutput(0, &outMain, 0);
     //arp.setOutput(1, &outAux, 0);
 
+    controllers.setCtrlNum(0, 2); //Breath
+    controllers.setChannel(0, 5);
+    controllers.setCtrlNum(1, 4); //Pedal
+    controllers.setChannel(1, 5);
+    controllers.setCtrlNum(2, 2);
+    controllers.setChannel(2, 6);
+    controllers.setCtrlNum(3, 4);
+    controllers.setChannel(3, 6);
+    controllers.setCtrlNum(4, 10);
+    controllers.setChannel(4, 6);
+    controllers.setCtrlNum(5, 11);
+    controllers.setChannel(5, 6);
+    controllers.setOutput(0, &merger, 0);
+    controllers.setOutput(1, &merger, 1);
+    merger.setOutput(0, &outMain, 0);
+    merger.setOutput(1, &outAux, 0);
 }

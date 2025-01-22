@@ -32,8 +32,9 @@ mvc/commands/settingsEditor.cpp \
 mvc/commands/appTest.cpp \
 synth/midiCommon.cpp \
 synth/midiMod.cpp \
-synth/midiMod_outputMixer.cpp \
+synth/midiMod_merger.cpp \
 synth/midiMod_outputPort.cpp \
+synth/midiMod_controllers.cpp \
 graphics/TeensyView.cpp \
 graphics/spiDisplay.c \
 

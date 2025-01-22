@@ -74,10 +74,10 @@ Controller::Controller(void)
     
     slider1.setHardware(new ArduinoAnalogIn(0));
     add( &slider1 );
-    slider1.setLowerKnobVal(250);
+    slider1.setLowerKnobVal(10);
     slider1.setUpperKnobVal(1014);
     slider1.setLowerIntVal(0);
-    slider1.setUpperIntVal(100);
+    slider1.setUpperIntVal(127);
     slider1.setSamplesAveraged(10);
 
     slider2.setHardware(new ArduinoAnalogIn(1));
@@ -85,7 +85,7 @@ Controller::Controller(void)
     slider2.setLowerKnobVal(10);
     slider2.setUpperKnobVal(1014);
     slider2.setLowerIntVal(0);
-    slider2.setUpperIntVal(10);
+    slider2.setUpperIntVal(127);
     slider2.setSamplesAveraged(10);
 
     slider3.setHardware(new ArduinoAnalogIn(2));
@@ -93,7 +93,7 @@ Controller::Controller(void)
     slider3.setLowerKnobVal(10);
     slider3.setUpperKnobVal(1014);
     slider3.setLowerIntVal(0);
-    slider3.setUpperIntVal(5);
+    slider3.setUpperIntVal(127);
     slider3.setSamplesAveraged(10);
 
     slider4.setHardware(new ArduinoAnalogIn(3));
@@ -101,7 +101,7 @@ Controller::Controller(void)
     slider4.setLowerKnobVal(10);
     slider4.setUpperKnobVal(1014);
     slider4.setLowerIntVal(0);
-    slider4.setUpperIntVal(30);
+    slider4.setUpperIntVal(127);
     slider4.setSamplesAveraged(10);
 
     slider5.setHardware(new ArduinoAnalogIn(4));
@@ -109,7 +109,7 @@ Controller::Controller(void)
     slider5.setLowerKnobVal(10);
     slider5.setUpperKnobVal(1014);
     slider5.setLowerIntVal(1);
-    slider5.setUpperIntVal(40);
+    slider5.setUpperIntVal(127);
     slider5.setSamplesAveraged(10);
 
     slider6.setHardware(new ArduinoAnalogIn(5));
@@ -117,7 +117,7 @@ Controller::Controller(void)
     slider6.setLowerKnobVal(10);
     slider6.setUpperKnobVal(1014);
     slider6.setLowerIntVal(4);
-    slider6.setUpperIntVal(32);
+    slider6.setUpperIntVal(127);
     slider6.setSamplesAveraged(10);
 
     // Set default states
@@ -164,57 +164,187 @@ void Controller::tick(int16_t deltaMs)
     //}
     freshenComponents(deltaMs);
 
-    if(sw1Down.serviceRisingEdge())
-    {
-    }
+
+    static MidiMessage msg = {
+        .channel = 14,
+        .tick = 0,
+    };
+
+    // Switch 1
     if(sw1Up.serviceRisingEdge())
     {
+        msg.controlMask = NoteOn;
+        msg.value = 0;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw1Up.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 0;
+        msg.data = 0;
+        merger.input(&msg, 2);
+    }
+    if(sw1Down.serviceRisingEdge())
+    {
+        msg.controlMask = NoteOn;
+        msg.value = 1;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw1Down.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 1;
+        msg.data = 0;
+        merger.input(&msg, 2);
+    }
+
+    // Switch 2
+    if(sw2Up.serviceRisingEdge())
+    {
+        msg.controlMask = NoteOn;
+        msg.value = 2;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw2Up.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 2;
+        msg.data = 0;
+        merger.input(&msg, 2);
     }
     if(sw2Down.serviceRisingEdge())
     {
+        msg.controlMask = NoteOn;
+        msg.value = 3;
+        msg.data = 64;
+        merger.input(&msg, 2);
     }
-    if(sw2Up.serviceRisingEdge())
+    if(sw2Down.serviceFallingEdge())
     {
+        msg.controlMask = NoteOff;
+        msg.value = 3;
+        msg.data = 0;
+        merger.input(&msg, 2);
+    }
+
+    // Switch 3
+    if(sw3Up.serviceRisingEdge())
+    {
+        msg.controlMask = NoteOn;
+        msg.value = 4;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw3Up.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 4;
+        msg.data = 0;
+        merger.input(&msg, 2);
     }
     if(sw3Down.serviceRisingEdge())
     {
+        msg.controlMask = NoteOn;
+        msg.value = 5;
+        msg.data = 64;
+        merger.input(&msg, 2);
     }
-    if(sw3Up.serviceRisingEdge())
+    if(sw3Down.serviceFallingEdge())
     {
+        msg.controlMask = NoteOff;
+        msg.value = 5;
+        msg.data = 0;
+        merger.input(&msg, 2);
+    }
+
+    // Switch 4
+    if(sw4Up.serviceRisingEdge())
+    {
+        msg.controlMask = NoteOn;
+        msg.value = 6;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw4Up.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 6;
+        msg.data = 0;
+        merger.input(&msg, 2);
     }
     if(sw4Down.serviceRisingEdge())
     {
+        msg.controlMask = NoteOn;
+        msg.value = 7;
+        msg.data = 64;
+        merger.input(&msg, 2);
     }
-    if(sw4Up.serviceRisingEdge())
+    if(sw4Down.serviceFallingEdge())
     {
+        msg.controlMask = NoteOff;
+        msg.value = 7;
+        msg.data = 0;
+        merger.input(&msg, 2);
+    }
+
+    // Switch 5
+    if(sw5Up.serviceRisingEdge())
+    {
+        msg.controlMask = NoteOn;
+        msg.value = 8;
+        msg.data = 64;
+        merger.input(&msg, 2);
+    }
+    if(sw5Up.serviceFallingEdge())
+    {
+        msg.controlMask = NoteOff;
+        msg.value = 8;
+        msg.data = 0;
+        merger.input(&msg, 2);
     }
     if(sw5Down.serviceRisingEdge())
     {
+        msg.controlMask = NoteOn;
+        msg.value = 9;
+        msg.data = 64;
+        merger.input(&msg, 2);
     }
-    if(sw5Up.serviceRisingEdge())
+    if(sw5Down.serviceFallingEdge())
     {
+        msg.controlMask = NoteOff;
+        msg.value = 9;
+        msg.data = 0;
+        merger.input(&msg, 2);
     }
-
 
 
     if(slider1.serviceChanged())
     {
         localPrintf("Slider 1: %d\n", slider1.getAsInt16());
+        controllers.setValue(0, slider1.getAsInt16());
     }
     if(slider2.serviceChanged())
     {
+        controllers.setValue(1, slider2.getAsInt16());
     }
     if(slider3.serviceChanged())
     {
+        controllers.setValue(2, slider3.getAsInt16());
     }
     if(slider4.serviceChanged())
     {
+        controllers.setValue(3, slider4.getAsInt16());
     }
     if(slider5.serviceChanged())
     {
+        controllers.setValue(4, slider5.getAsInt16());
     }
     if(slider6.serviceChanged())
     {
+        controllers.setValue(5, slider6.getAsInt16());
     }
 
 

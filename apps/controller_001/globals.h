@@ -47,10 +47,14 @@ extern Pool pool_20;
 extern Pool pool_32;
 
 #include "midiMod_outputPort.h"
+extern OutputPort outMain;
+extern OutputPort outAux;
 
-#include "midiMod_outputMixer.h"
-extern OutputMixer outputMixer;
+#include "midiMod_merger.h"
+extern Merger merger;
 
+#include "midiMod_controllers.h"
+extern Controllers controllers;
 
 //Defined in globals.cpp
 float power(float x, int y);

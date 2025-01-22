@@ -37,6 +37,9 @@ Logging logTaskLog;
 #endif
 /* References ----------------------------------------------------------------*/
 
+#define MIDI_CTRL_TX_LOOP_TARGET 50
+
+static uint32_t loopCtr = 0;
 
 //Collection of tasks for midi
 
@@ -97,7 +100,12 @@ extern "C" void taskMidiRx(void * argument)
                 bspPrintf("taskMidi miss\n");
             }
         }
+        loopCtr++;
+        if (loopCtr >= MIDI_CTRL_TX_LOOP_TARGET)
+        {
+            loopCtr = 0;
+            controllers.tick();
+        }
         vTaskDelay( 1 );
-        
     }
 }
