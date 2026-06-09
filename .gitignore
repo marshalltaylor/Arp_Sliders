@@ -33,3 +33,10 @@
 *.exe
 *.out
 *.app
+
+# GCC testing
+*.stackdump
+
+# Backup files 
+#  drawio
+*.bkp

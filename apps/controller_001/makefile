@@ -62,7 +62,6 @@ $(SYNTH_COMMON_ROOT)/modules/logging \
 $(SYNTH_COMMON_ROOT)/modules/midi47fx \
 $(SYNTH_COMMON_ROOT)/modules/uCModules \
 
-
 STATIC_LIBS = \
 $(SYNTH_COMMON_ROOT)/FreeRTOS/build/FreeRTOS.a \
 $(SYNTH_COMMON_ROOT)/modules/logging/build/logging.a \
@@ -107,16 +106,23 @@ all: $(STATIC_LIBS) $(TARGET_EXEC) $(TARGET_BIN)
 clean:: clean_all
 
 openocd:
-	cygstart cmd /k $(shell cygpath -w $(PATH_OPENOCD)/launch_openocd.bat)
+	# The cygwin way:
+	#cygstart cmd /k $(shell cygpath -w $(PATH_OPENOCD)/launch_openocd.bat)
+	# The linux way:
+	gnome-terminal -- bash -c "$(PATH_OPENOCD)/launch_openocd.sh; exec bash"
 
 gdb:
-	@echo ""
-	@echo "gdb needs special ctrl-c treatment."
-	@echo "Launch cmd.exe from start and enter these commands:"
-	@echo ""
-	@echo "E:"
-	@echo "cd $(shell cygpath -w $(shell pwd))"
-	@echo "$(shell cygpath -w $(GDB)) -x gdbinit.txt build/output.elf"
+	# The linux way:
+	gnome-terminal -- bash -c "$(GDB) -x gdbinit.txt build/output.elf; exec bash"
+
+	# The cygwin way:
+#	@echo ""
+#	@echo "gdb needs special ctrl-c treatment."
+#	@echo "Launch cmd.exe from start and enter these commands:"
+#	@echo ""
+#	@echo "E:"
+#	@echo "cd $(shell cygpath -w $(shell pwd))"
+#	@echo "$(shell cygpath -w $(GDB)) -x gdbinit.txt build/output.elf"
 
 info:
 	@echo "***** ***** ***** DEBUG ***** ***** *****"

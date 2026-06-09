@@ -199,7 +199,7 @@ extern "C" void taskSystemStart(void * argument)
                         cmdBufferPtr--;
                     }
                 }
-                else if(c == '\n')
+                else if ((c == '\r') || (c == '\n'))
                 {
                     localPrintf("\n");
                     // Parse buffer

@@ -47,6 +47,7 @@ extern void handleNoteOff2(byte channel, byte pitch, byte velocity);
 extern void handleControlChange1(byte channel, byte number, byte value);
 extern void handleControlChange2(byte channel, byte number, byte value);
 extern void handlePitchBend1(byte channel, int bend);
+extern void handlePitchBend2(byte channel, int bend);
 
 /* Functions -----------------------------------------------------------------*/
 void hwTimerCallback(void)
@@ -74,8 +75,8 @@ extern "C" void globalsInit(void)
     MIDI.setHandleControlChange(handleControlChange1);
     MIDI.setHandlePitchBend(handlePitchBend1);
     //Thru option:
-    //MIDI.turnThruOff();
-    
+    MIDI.turnThruOff();
+
     CtrlMIDI.setHandleClock(handleClock2);
     CtrlMIDI.setHandleStart(handleStart2);
     CtrlMIDI.setHandleContinue(handleContinue2);
@@ -83,9 +84,10 @@ extern "C" void globalsInit(void)
     CtrlMIDI.setHandleNoteOn(handleNoteOn2);
     CtrlMIDI.setHandleNoteOff(handleNoteOff2);
     CtrlMIDI.setHandleControlChange(handleControlChange2);
+    CtrlMIDI.setHandlePitchBend(handlePitchBend2);
     //Thru option:
-    //CtrlMIDI.turnThruOff();
-    
+    CtrlMIDI.turnThruOff();
+
     // Write our function address into the hw timer
     timer3setPeriod(hwTimerInterval);
     timer3TickCallback = hwTimerCallback;
@@ -124,4 +126,5 @@ extern "C" void globalsInit(void)
     controllers.setOutput(1, &merger, 1);
     merger.setOutput(0, &outMain, 0);
     merger.setOutput(1, &outAux, 0);
+    merger.setDebug(false);
 }

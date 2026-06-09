@@ -7,12 +7,13 @@
 
 int midiProgram(int argc, char *argv[]);
 
-commandInfo_t midiCmd = {
-    "midi",
-    "Unknown midi tests",
-    " usage: midi [g [0|1]|clock|outs|ins]\n  g - enb debug msgs\n  clock - midiClock\n  outs - outputMixer\n  ins - inputNoteList",
-    &midiProgram
-};
+commandInfo_t midiCmd
+    = { "midi",
+        "Unknown midi tests",
+        " usage: midi [g [0(disable)|1|2|3]|ctrl|merger|outs]\n  g - enb debug "
+        "msgs\n  ctrl - controllers\n  merger - note merge, pass all\n  outs - "
+        "output ports",
+        &midiProgram };
 
 int midiProgram(int argc, char *argv[])
 {
@@ -23,15 +24,15 @@ int midiProgram(int argc, char *argv[])
     if(all || 0 == strcmp((const char*)argv[0], "ctrl"))
     {
         controllers.printDebug();
-        //controllers.tick();
     }
     if(all || 0 == strcmp((const char*)argv[0], "merger"))
     {
         merger.printDebug();
     }
-    if(all || 0 == strcmp((const char*)argv[0], "ins"))
+    if (all || 0 == strcmp((const char *)argv[0], "outs"))
     {
-        //inputNoteList.printList();
+        // outMain.printList();
+        // outAux.printList();
     }
     if (!all && 0 == strcmp((const char*)argv[0], "g"))
     {
@@ -41,12 +42,30 @@ int midiProgram(int argc, char *argv[])
         }
         else
         {
-            bool enb = strtol(argv[1], NULL, 10);
-            localPrintf("Midi graph debug = %d\n", enb);
-            controllers.setDebug(enb);
-            outMain.setDebug(enb);
-            outAux.setDebug(enb);
-            merger.setDebug(enb);
+            int selection = strtol(argv[1], NULL, 10);
+            localPrintf("Midi graph debug option: %d\n", selection);
+            switch (selection)
+            {
+                case 0:
+                    localPrintf("Disabling all midiMod loggers\n");
+                    controllers.setDebug(false);
+                    outMain.setDebug(false);
+                    outAux.setDebug(false);
+                    merger.setDebug(false);
+                    break;
+                case 1:
+                    controllers.setDebug(true);
+                    break;
+                case 2:
+                    merger.setDebug(true);
+                    break;
+                case 3:
+                    outMain.setDebug(true);
+                    outAux.setDebug(true);
+                    break;
+                default:
+                    localPrintf("option not implemented\n");
+            }
         }
     }
     
